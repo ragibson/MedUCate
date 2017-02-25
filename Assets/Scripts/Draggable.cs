@@ -43,7 +43,7 @@ public class Draggable : MonoBehaviour
 	}
 
 	// Move Draggable object's location to be within the bounds of the Draggable area
-	void forceInBounds ()
+	public void forceInBounds ()
 	{
 		// Get global width and height of the main display
 		maxXDisplacement = primaryDisplay.rect.width * primaryDisplay.localScale.x / 2 - this.transform.localScale.x / 2;
