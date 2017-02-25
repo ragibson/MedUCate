@@ -6,7 +6,9 @@ public class GameLogicManager : MonoBehaviour
 {
 
 	/*
-	 * TODO: Remove hardcoded Question Sets
+	 * 	TODO: Remove hardcoded Question Sets
+	 *
+	 * 	TODO: Implement Campaign Level Completion Triggers
 	 */
 
 	public Settings settings = new Settings ();
@@ -113,6 +115,24 @@ public class GameLogicManager : MonoBehaviour
 	public Question getCurrentQuestion ()
 	{
 		return questionSets [selectedSet].questions [currentQuestion];
+	}
+
+	/*
+	 * 	Randomly choose placement of the star block	
+	 * 
+	 * 	params:
+	 * 		bounds: the RectTransform of the play area
+	 * 		objects: [Sword, Shield, Star]
+	 */
+	public void randomlyPlaceStar (RectTransform bounds, GameObject[] objects)
+	{
+		float maxXDisplacement = bounds.rect.width * bounds.localScale.x / 2 - objects [2].transform.localScale.x / 2;
+		float maxYDisplacement = bounds.rect.height * bounds.localScale.y / 2 - objects [2].transform.localScale.y / 2;
+
+		Vector3 randomPlacement = new Vector3 (bounds.position.x + UnityEngine.Random.Range (-100, 100) * maxXDisplacement / 100,
+			                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
+			                          objects [2].transform.position.z);
+		objects [2].transform.position = randomPlacement;
 	}
 
 	// ===== HARD CODED QUESTION SETS FROM PROTOTYPE ===== //
