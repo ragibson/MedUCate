@@ -35,13 +35,15 @@ public class Game
 		Question currentQuestion = currentSet.questions [Random.Range (0, currentSet.numberOfQuestions () - 1)];
 		answers = currentQuestion.shuffledAnswers ();
 
+		gameLogic.computer.updateTimeAndAnswer ();
+
 		currentTriviaRound = new TriviaRound (roundTime, currentQuestion, answers, currentQuestion.correctAnswer, round);
 		round += 1;
 	}
 
 	public string textToDisplay ()
 	{
-		return currentTriviaRound.displayText ();
+		return currentTriviaRound.displayText (gameLogic.computer);
 	}
 
 	public void answerClicked (int i)

@@ -556,9 +556,12 @@ public class UIManager : MonoBehaviour
 		if (!game.currentTriviaRound.answered ()) {
 			setDisplayColor (Color.blue);
 		} else {
-			if (game.currentTriviaRound.correct) {
+			if (game.currentTriviaRound.playerAttacks (computer)) {
 				// Dark Green
 				setDisplayColor (new Color (0.0f, 0.5f, 0.0f));
+			} else if (game.currentTriviaRound.correct) {
+				// Dark Yellow
+				setDisplayColor (new Color (0.5f, 0.5f, 0.0f));
 			} else {
 				setDisplayColor (Color.red);
 			}
@@ -571,27 +574,9 @@ public class UIManager : MonoBehaviour
 		if (game.currentTriviaRound.proceedToCombat) {
 			game.nextCombat ();
 
-			/*
-			 * 	This is a bit of a hack to get the blocks to move around
-			 * 	since the Computer Player AI doesn't really exist yet
-			 */
-
 			RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
-
-			float maxXDisplacement = bounds.rect.width * bounds.localScale.x / 2 - objects [0].transform.localScale.x / 2;
-			float maxYDisplacement = bounds.rect.height * bounds.localScale.y / 2 - objects [0].transform.localScale.y / 2;
-
-			for (int i = 0; i < objects.Length; i += 2) {
-				Vector3 movement = new Vector3 (bounds.position.x + UnityEngine.Random.Range (-100, 100) * maxXDisplacement / 100,
-					                   bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
-					                   0);
-
-				objects [i].transform.position = new Vector3 (movement [0], movement [1], objects [i].transform.position.z);
-			}
-
-			objects [2].transform.position = new Vector3 (objects [1].transform.position.x + UnityEngine.Random.Range (-25, 25) * maxXDisplacement / 100,
-				objects [1].transform.position.y + UnityEngine.Random.Range (-25, 25) * maxYDisplacement / 100,
-				objects [2].transform.position.z);
+			gameLogic.randomlyPlaceStar (bounds, objects);
+			gameLogic.computer.placeBlock (game.currentTriviaRound.playerAttacks (computer), bounds, objects);
 
 			currentMenu = combatRound;
 		}
@@ -631,11 +616,11 @@ public class UIManager : MonoBehaviour
 		if (game.currentCombatRound.calculateDamage) {
 
 			objectVisibility (true, true, true);
-			
+
 			// This calculates damageDealt, damageBlocked
 			game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
 
-			if (game.currentTriviaRound.correct) {
+			if (game.currentTriviaRound.playerAttacks (computer)) {
 				game.dealDamage (0, damageDealt - damageBlocked);
 			} else {
 				game.dealDamage (damageDealt - damageBlocked, 0);

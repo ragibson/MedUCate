@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class TriviaRound
 {
+	/*
+	 * 	TODO: If neither player answers correctly, skip combat
+	 */
+
 	public float roundTime;
 
 	private Question currentQuestion;
@@ -51,15 +55,15 @@ public class TriviaRound
 	{
 		// If the player hasn't answered yet, we let them
 		if (!answered ()) {
-			answerTime = currentTime;
+			answerTime = Mathf.Round (100 * currentTime) / 100;
 			correct = (string.Compare (answers [i], correctAnswer) == 0);
 		}
 	}
 
-	public string displayText ()
+	public string displayText (ComputerPlayer computer)
 	{
 		if (answered () || roundOver ()) {
-			return textAfterAnswer ();
+			return textAfterAnswer (computer);
 		}
 		return textBeforeAnswer ();
 	}
@@ -69,19 +73,30 @@ public class TriviaRound
 		return string.Format ("ROUND {0}\n\n{1}", round, currentQuestion.questionText);
 	}
 
-	public string textAfterAnswer ()
+	public string textAfterAnswer (ComputerPlayer computer)
 	{
 		string action = "DEFEND";
 		string choice = "WRONG!";
-		if (correct) {
+		if (playerAttacks (computer)) {
 			action = "ATTACK";
+		}
+		if (correct) {
 			choice = "CORRECT!";
+		}
+
+		string computerChoice = "INCORRECTLY";
+		float computerTime = Mathf.Round (100 * computer.answerTime) / 100;
+		if (computer.correctAnswer) {
+			computerChoice = "CORRECTLY";
 		}
 
 		return string.Format ("THE ANSWER WAS\n\n" +
 		"{0}\n\n" +
-		"YOUR CHOICE WAS {1}\n\n" +
-		"YOU GET TO {2} THIS ROUND!", correctAnswer, choice, action);
+		"YOUR CHOICE WAS {1}\n" +
+		"YOU ANSWERED IN {2} SECONDS\n\n" +
+		"YOUR OPPONENT ANSWERED {3}\n" +
+		"IN {4} SECONDS\n\n" +
+		"YOU GET TO {5} THIS ROUND!", correctAnswer, choice, answerTime, computerChoice, computerTime, action);
 	}
 
 	public bool roundOver ()
@@ -92,5 +107,18 @@ public class TriviaRound
 	public float timeRemaining ()
 	{
 		return roundTime - currentTime;
+	}
+
+	/*
+	 * 	Determines if the player is attacking
+	 */
+	public bool playerAttacks (ComputerPlayer computer)
+	{
+		if (correct && computer.correctAnswer) {
+			return answerTime < computer.answerTime;
+		} else {
+			// TODO: If neither player answers correctly, skip combat
+			return correct;
+		}
 	}
 }
