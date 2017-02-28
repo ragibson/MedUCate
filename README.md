@@ -10,9 +10,11 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 <a name = "TODO"/>
 ## TODO
   * General
-    * XML parser for QuestionSet <-> XML
     * Networking for Multiplayer
     * Handle player reputation
+    * Replace training with a tutorial
+    * Give small amounts of reputation for campaign and tutorial
+    * Multiplayer timeouts and randomized AIs
   * GameLogicManager.cs
     * Remove hardcoded Question Sets
     * Implement Campaign Level Completion Triggers
