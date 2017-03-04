@@ -579,6 +579,10 @@ public class UIManager : MonoBehaviour
 			gameLogic.computer.placeBlock (game.currentTriviaRound.playerAttacks (computer), bounds, objects);
 
 			currentMenu = combatRound;
+
+			if (game.currentTriviaRound.skipCombat (computer)) {
+				currentMenu = continueGame;
+			}
 		}
 	}
 

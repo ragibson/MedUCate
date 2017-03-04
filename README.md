@@ -21,8 +21,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
   * QuestionSet.cs
     * Handle activationCode
     * Handle expiryTime
-  * TriviaRound.cs
-    * If neither player answers correctly, skip combat
   * UIManager.cs
     * Implement "ADD QUESTIONS"
     * Implement "VIEW HISTORY"
