@@ -90,13 +90,18 @@ public class TriviaRound
 			computerChoice = "CORRECTLY";
 		}
 
+		string actionText = string.Format ("YOU GET TO {0} THIS ROUND!", action);
+		if (skipCombat (computer)) {
+			actionText = "COMBAT WILL BE SKIPPED!";
+		}
+
 		return string.Format ("THE ANSWER WAS\n\n" +
 		"{0}\n\n" +
 		"YOUR CHOICE WAS {1}\n" +
 		"YOU ANSWERED IN {2} SECONDS\n\n" +
 		"YOUR OPPONENT ANSWERED {3}\n" +
 		"IN {4} SECONDS\n\n" +
-		"YOU GET TO {5} THIS ROUND!", correctAnswer, choice, answerTime, computerChoice, computerTime, action);
+		actionText, correctAnswer, choice, answerTime, computerChoice, computerTime, action);
 	}
 
 	public bool roundOver ()
@@ -109,15 +114,21 @@ public class TriviaRound
 		return roundTime - currentTime;
 	}
 
+	public bool skipCombat (ComputerPlayer computer)
+	{
+		return !correct && !computer.correctAnswer;
+	}
+
 	/*
 	 * 	Determines if the player is attacking
+	 * 
+	 * 	Assumes that we are not skipping combat
 	 */
 	public bool playerAttacks (ComputerPlayer computer)
 	{
 		if (correct && computer.correctAnswer) {
 			return answerTime < computer.answerTime;
 		} else {
-			// TODO: If neither player answers correctly, skip combat
 			return correct;
 		}
 	}

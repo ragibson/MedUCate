@@ -64,9 +64,12 @@ public class CombatRound
 		// Number of points that overlap both star and shield
 		int starShieldCount = 0;
 
-		// We raycast in a ~20x20 grid; use 20.1 for FP imprecision
-		for (float x = xMin; x <= xMax; x += (xMax - xMin) / 20.01f) {
-			for (float y = yMin; y <= yMax; y += (yMax - yMin) / 20.01f) {
+		// We raycast in the ~20x20 grid at the center of a ~22x22 grid
+		// We're using 22.1 for FP imprecision
+		float xIncrement = (xMax - xMin) / 22.1f;
+		float yIncrement = (yMax - yMin) / 22.1f;
+		for (float x = xMin + xIncrement; x <= xMax - xIncrement; x += xIncrement) {
+			for (float y = yMin + yIncrement; y <= yMax - yIncrement; y += yIncrement) {
 				
 				/*
 				 * 	hitStar:

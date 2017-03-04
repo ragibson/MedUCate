@@ -161,6 +161,28 @@ public class ComputerPlayer
 	}
 
 	/*
+	 * 	Places the sword within 50% of the star block for the tutorial
+	 */
+	public void placeBlockTutorial (RectTransform bounds, GameObject[] objects)
+	{
+		/*
+		 * 	This assumes that all the blocks have the same width/height
+		 * 	At this point, the client has emphasized this requirement
+		 */
+		float maxXDisplacement = bounds.rect.width * bounds.localScale.x / 2;
+		float maxYDisplacement = bounds.rect.height * bounds.localScale.y / 2;
+
+		// Within 50% of the star center
+		Vector3 starOverlapPosition = new Vector3 (objects [2].transform.position.x + UnityEngine.Random.Range (-50, 50) * maxXDisplacement / 100,
+			objects [2].transform.position.y + UnityEngine.Random.Range (-50, 50) * maxYDisplacement / 100, 0);
+
+		objects [0].transform.position = new Vector3 (starOverlapPosition [0], starOverlapPosition [1], objects [0].transform.position.z);
+
+		// Make sure no placement has moved blocks outside the play area
+		objects [0].GetComponentInChildren<Draggable> ().forceInBounds ();
+	}
+
+	/*
 	 * 	Computer Difficulty:
 	 * 		Easy:	Correct 50% of the time
 	 * 		Medium:	Correct 75% of the time

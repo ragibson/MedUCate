@@ -8,7 +8,7 @@ public class GameLogicManager : MonoBehaviour
 	/*
 	 * 	TODO: Remove hardcoded Question Sets
 	 *
-	 * 	TODO: Implement Campaign Level Completion Triggers
+	 * 	TODO: Maintain settings past exiting app
 	 */
 
 	public Settings settings = new Settings ();
@@ -23,12 +23,22 @@ public class GameLogicManager : MonoBehaviour
 	public int currentQuestion = 0;
 	public bool hideAnswers = false;
 
+	// ===   Campaign High Scores   === //
+	public bool inCampaign = false;
+	public int[] campaignScores;
+
 	// Initialization
 	void Start ()
 	{
 		// TODO: Remove hardcoded Question Sets
 		questionSets = prototypeQuestionSets ();
 		setCurrentSet (0);
+
+		// TODO: Get these from a settings file
+		campaignScores = new int[9];
+		for (int i = 0; i < 9; i++) {
+			campaignScores [i] = 0;
+		}
 	}
 
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
@@ -133,6 +143,13 @@ public class GameLogicManager : MonoBehaviour
 			                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
 			                          objects [2].transform.position.z);
 		objects [2].transform.position = randomPlacement;
+	}
+
+	public string getCampaignScore(int level) {
+		if (campaignScores [level] == 0) {
+			return "NOT YET COMPLETED";
+		}
+		return string.Format("HIGH SCORE: {0}/200", campaignScores [level]);
 	}
 
 	// ===== HARD CODED QUESTION SETS FROM PROTOTYPE ===== //
