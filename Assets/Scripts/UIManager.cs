@@ -140,11 +140,11 @@ public class UIManager : MonoBehaviour
 	void singlePlayer ()
 	{
 		setButtonsText (new string[] { "QUICK PLAY >>>", 
-			"TRAINING >>>", 
+			"TUTORIAL >>>", 
 			"CAMPAIGN >>>", 
 			"<<< BACK TO MENU"
 		});
-		setButtonBehaviors (new Action[] { singlePlayerQuickPlay, singlePlayerTraining, singlePlayerCampaign, mainMenu });
+		setButtonBehaviors (new Action[] { singlePlayerQuickPlay, tutorialStart, singlePlayerCampaign, mainMenu });
 
 		setDisplayImage (images [1]);
 		setDisplayColor (Color.blue);
@@ -249,34 +249,259 @@ public class UIManager : MonoBehaviour
 		currentMenu = singlePlayerQuickPlay;
 	}
 
-	void singlePlayerTraining ()
+	void tutorialStart ()
 	{
-		setButtonsText (new string[] { "<<< START GAME >>>",
-			"CHANGE ROUNDS >>>", 
-			"CHANGE TYPE >>>",
+		objectVisibility (false, false, false);
+		setButtonsText (new string[] { "THESE BUTTONS WILL ALWAYS HAVE HELPFUL TEXT",
+			"OR DESCRIBE THE BUTTON'S ACTION", 
+			"PROCEED >>>",
 			"<<< BACK TO SINGLEPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
-			settings.changeRounds,
-			settings.changeTrainingType,
+			noMenu,
+			noMenu,
+			tutorialTrivia,
 			singlePlayer
 		});
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
-		setDisplayText ("MAIN MENU > SINGLEPLAYER > TRAINING\n\n" +
-		"CURRENT QUESTIONS -\n" +
-		settings.selected.setName +
-		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
-		"CURRENT LENGTH -\n" +
-		settings.getLengthString () +
-		String.Format ("\n(OPTION {0} OF {1})\n\n", settings.round + 1, settings.rounds.Length) +
-		"CURRENT MODE -\n" +
-		settings.getTrainingModeString () +
-		String.Format ("\n(OPTION {0} OF {1})", settings.trainingMode + 1, settings.trainingModes.Length));
+		setDisplayText ("WELCOME TO THE TUTORIAL\n\n" +
+		"HERE, WE'LL LEARN ABOUT BASIC GAMEPLAY,\n" +
+		"MAINLY THE TRIVIA AND COMBAT PHASES\n\n" +
+		"LET'S START WITH AN EXAMPLE TRIVIA ROUND:\n" +
+		"CLICK THE BUTTON BELOW TO PROCEED");
 
-		currentMenu = singlePlayerTraining;
+		currentMenu = tutorialStart;
+	}
+
+	void tutorialTrivia ()
+	{
+		objectVisibility (false, false, false);
+		setButtonsText (new string[] { "THESE BUTTONS WILL LIST ANSWERS TO THE QUESTION",
+			"ONE WILL BE CORRECT AND THREE WILL BE INCORRECT", 
+			"PROCEED >>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			tutorialTrivia1,
+			tutorialStart
+		});
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("ROUND 1\n\n" +
+		"1+1?");
+
+		currentMenu = tutorialTrivia;
+	}
+
+	void tutorialTrivia1 ()
+	{
+		objectVisibility (false, false, false);
+		setButtonsText (new string[] { "",
+			"", 
+			"PROCEED >>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			tutorialCombat,
+			tutorialTrivia
+		});
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("YOU WILL HAVE 10 SECONDS TO ANSWER EACH QUESTION\n\n" +
+		"ANSWER CORRECTLY BEFORE YOUR OPPONENT DOES AND\n" +
+		"YOU'LL BE ALLOWED TO ``ATTACK'' IN THE COMBAT PHASE\n\n" +
+		"ANSWER INCORRECTLY OR TOO SLOWLY AND\n" +
+		"YOU'LL HAVE TO ``DEFEND''\n\n" +
+		"IF NEITHER PLAYER ANSWERS CORRECTLY,\n" +
+		"COMBAT WILL BE SKIPPED ALTOGETHER\n\n" +
+		"NOW, LET'S DISCUSS THE COMBAT PHASE!");
+
+		currentMenu = tutorialTrivia1;
+	}
+
+	void tutorialCombat ()
+	{
+		objectVisibility (false, false, false);
+		setButtonsText (new string[] { "",
+			"", 
+			"PROCEED >>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			tutorialCombat1,
+			tutorialTrivia1
+		});
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("AS THE ATTACKING PLAYER,\n" +
+		"YOU'LL PLACE A SWORD SQUARE\n\n" +
+		"THIS SQUARE WILL DEAL DAMAGE\n" +
+		"THROUGHOUT ITS ENTIRE AREA\n\n" +
+		"IT WILL DEAL *DOUBLE DAMAGE* WHERE\n" +
+		"IT OVERLAPS WITH THE STAR BLOCK\n\n" +
+		"LET'S SEE HOW THIS WORKS IN PRACTICE:\n\n" +
+		"NOW, WE'LL SHOW HOW MUCH DAMAGE YOU'LL DO,\n" +
+		"BUT KEEP IN MIND THAT YOU WON'T BE ABLE\n" +
+		"TO SEE THIS IN A REAL GAME!");
+
+		currentMenu = tutorialCombat;
+	}
+
+	// Setup for next tutorial menu
+	void tutorialCombat1 ()
+	{	
+		/*
+		 * 	200 HP
+		 * 	10 seconds per round
+		 * 	25 damage per attack
+		 */	
+		game = new Game (200, 10, 25);
+
+		RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
+		gameLogic.randomlyPlaceStar (bounds, objects);
+
+		objectVisibility (true, false, true);
+
+		game.nextRound ();
+		game.currentTriviaRound.correct = true;
+		game.nextCombat ();
+
+		currentMenu = tutorialCombat2;
+	}
+
+	void tutorialCombat2 ()
+	{
+		setDisplayColor (Color.clear);
+		setDisplayText ("");
+
+		game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
+
+		setButtonsText (new string[] { "DAMAGE: " + damageDealt,
+			"TRY DRAGGING THE SWORD AROUND!", 
+			"PROCEED >>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			tutorialCombat3,
+			tutorialCombat
+		});
+
+		currentMenu = tutorialCombat2;
+	}
+
+	void tutorialCombat3 ()
+	{
+		objectVisibility (false, false, false);
+		setButtonsText (new string[] { "",
+			"", 
+			"PROCEED >>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			tutorialCombat4,
+			tutorialCombat1
+		});
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("AS THE DEFENDING PLAYER,\n" +
+		"YOU'LL PLACE A SHIELD SQUARE\n\n" +
+		"THIS SQUARE WILL BLOCK ALL DAMAGE\n" +
+		"THROUGHOUT ITS ENTIRE AREA\n\n" +
+		"LET'S SEE HOW THIS WORKS IN PRACTICE:\n\n" +
+		"NOW, WE'LL SHOW HOW MUCH DAMAGE YOU'LL BLOCK,\n" +
+		"AND THE POSITION OF THE SWORD BLOCK\n" +
+		"BUT KEEP IN MIND THAT YOU WON'T BE ABLE\n" +
+		"TO SEE THESE IN A REAL GAME!");
+
+		currentMenu = tutorialCombat3;
+	}
+
+	// Setup for next tutorial menu
+	void tutorialCombat4 ()
+	{
+		/*
+		 * 	200 HP
+		 * 	10 seconds per round
+		 * 	25 damage per attack
+		 */	
+		game = new Game (200, 10, 25);
+
+		RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
+		gameLogic.randomlyPlaceStar (bounds, objects);
+
+		objectVisibility (true, true, true);
+
+		game.nextRound ();
+		game.currentTriviaRound.correct = false;
+		computer.placeBlockTutorial (bounds, objects);
+		game.nextCombat ();
+
+		currentMenu = tutorialCombat5;
+	}
+
+	void tutorialCombat5 ()
+	{
+		setDisplayColor (Color.clear);
+		setDisplayText ("");
+
+		game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
+
+		setButtonsText (new string[] { string.Format ("DAMAGE BLOCKED: {0} OUT OF {1}", damageBlocked, damageDealt),
+			"TRY DRAGGING THE SHIELD AROUND!", 
+			"PROCEED >>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			endTutorial,
+			tutorialCombat3
+		});
+
+		currentMenu = tutorialCombat5;
+	}
+
+	void endTutorial ()
+	{
+		objectVisibility (false, false, false);
+		setButtonsText (new string[] { "",
+			"", 
+			"TO MAIN MENU>>>",
+			"<<< PREVIOUS MENU"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			mainMenu,
+			tutorialCombat4
+		});
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("THAT'S ALL YOU NEED TO KNOW TO PLAY!\n\n" +
+		"TO START OUT, TRY SINGLEPLAYER QUICK PLAY\n" +
+		"OR THE SINGLEPLAYER CAMPAIGN\n\n" +
+		"IF YOU'RE CONFIDENT IN YOUR SKILLS\n" +
+		"TRY JUMPING STRAIGHT INTO MULTIPLAYER\n\n" +
+		"HAVE FUN!");
+
+		currentMenu = endTutorial;
 	}
 
 	void singlePlayerCampaign ()
