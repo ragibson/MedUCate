@@ -16,7 +16,7 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
     * Multiplayer timeouts and randomized AIs
   * GameLogicManager.cs
     * Remove hardcoded Question Sets
-    * Implement Campaign Level Completion Triggers
+    * Retrieve settings from file on startup
   * QuestionSet.cs
     * Handle activationCode
     * Handle expiryTime

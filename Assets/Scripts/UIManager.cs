@@ -506,13 +506,14 @@ public class UIManager : MonoBehaviour
 
 	void singlePlayerCampaign ()
 	{
+
 		setButtonsText (new string[] { "<<< START GAME >>>",
 			"CHANGE LEVEL >>>", 
 			"<<< CHANGE LEVEL",
 			"<<< BACK TO SINGLEPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
+			startCampaign,
 			computer.increaseLevel,
 			computer.decreaseLevel,
 			singlePlayer
@@ -528,10 +529,16 @@ public class UIManager : MonoBehaviour
 		computer.getLevelString () +
 		String.Format ("\n(OPTION {0} OF {1})\n\n", computer.level + 1, computer.numberOfLevels ()) +
 		"LEVEL STATUS -\n" +
-		"NOT YET COMPLETED\n" +
-		"(THERE ARE 9 LEVELS TOTAL)");
+		gameLogic.getCampaignScore (computer.level) +
+		"\n(THERE ARE 9 LEVELS TOTAL)");
 
 		currentMenu = singlePlayerCampaign;
+	}
+
+	void startCampaign ()
+	{
+		gameLogic.inCampaign = true;
+		currentMenu = startGame;
 	}
 
 	void multiPlayerQuickPlay ()
@@ -753,6 +760,10 @@ public class UIManager : MonoBehaviour
 			// Dark Green
 			setDisplayColor (new Color (0.0f, 0.5f, 0.0f));
 			setDisplayText ("YOU WIN!");
+			if (gameLogic.inCampaign) {
+				gameLogic.campaignScores [computer.level] = (int)Math.Round (game.currentCombatRound.playerHealth);
+				gameLogic.inCampaign = false;
+			}
 		}
 
 		if (slider.value <= 0) {
