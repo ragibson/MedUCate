@@ -10,7 +10,7 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 <a name = "TODO"/>
 ## TODO
   * General
-    * Networking for Multiplayer
+    * Networking for Multiplayer (including leaderboard)
     * Handle player reputation
     * Give small amounts of reputation for campaign and tutorial
     * Multiplayer timeouts and randomized AIs
@@ -25,7 +25,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
     * Implement "VIEW HISTORY"
     * Implement "HOST GAME"
     * Implement "JOIN GAME"
-    * Implement "LEADERBOARD"
     * (Nonessential) XML parser for menus
   
 <a name = "Requirements"/>

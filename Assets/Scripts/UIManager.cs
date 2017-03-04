@@ -15,9 +15,9 @@ public class UIManager : MonoBehaviour
 	 * 		HOST GAME
 	 * 		JOIN GAME
 	 * 
-	 * 	TODO: LEADERBOARD was a placeholder in
-	 * 	the original prototype and has also
-	 * 	not been implemented here.
+	 * 	TODO: LEADERBOARD needs to be connected
+	 * 	to the server once networking  for the
+	 * 	game is more complete.
 	 * 
 	 * 	TODO: Possibly store the menus in an
 	 * 	XML file so they don't take up so much
@@ -608,14 +608,15 @@ public class UIManager : MonoBehaviour
 		});
 		setButtonBehaviors (new Action[] {
 			startGame,
-			noMenu,
+			leaderboardLoad,
 			settings.changeWager,
 			multiPlayer
 		});
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
-		setDisplayText ("SPONSORED QUESTIONS -\n" +
+		setDisplayText ("MAIN MENU > MULTIPLAYER > ONE MAN ARMY\n\n" +
+		"SPONSORED QUESTIONS -\n" +
 		"DEFAULT NUTRITIONAL HEALTH SET\n" +
 		"(THESE CHANGE EVERY DAY)\n\n" +
 		"CURRENT REPUTATION -\n" +
@@ -626,6 +627,51 @@ public class UIManager : MonoBehaviour
 		String.Format ("\n(OPTION {0} OF {1})", settings.wager + 1, settings.wagers.Length));
 
 		currentMenu = multiPlayerOneManArmy;
+	}
+
+	string leaderboardURL = "http://www.unc.edu/~ragibson/leaderboardtest.txt";
+	WWW leaderboardWWW;
+
+	void leaderboardLoad ()
+	{
+		leaderboardWWW = new WWW (leaderboardURL);
+		currentMenu = leaderboard;
+	}
+
+	void leaderboard ()
+	{
+		setButtonsText (new string[] { "",
+			"", 
+			"",
+			"<<< BACK TO ONE MAN ARMY"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			noMenu,
+			multiPlayerOneManArmy
+		});
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+
+		if (leaderboardWWW.isDone) {
+			if (string.Equals (leaderboardWWW.text, "")) {
+				setDisplayText ("Error with internet connection");
+			} else if (leaderboardWWW.text.Contains ("was not found on this server.")) {
+				/*
+				 * This error message is just for the test file and will probably
+				 * not work with the final server setup
+				 */
+				setDisplayText ("Could not find leaderboard");
+			} else {
+				setDisplayText (leaderboardWWW.text);
+			}
+		} else {
+			setDisplayText ("Loading...");
+		}
+
+		currentMenu = leaderboard;
 	}
 
 	void changeQuestions ()
