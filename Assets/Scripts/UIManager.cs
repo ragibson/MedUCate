@@ -881,7 +881,7 @@ public class UIManager : MonoBehaviour
 		slider.value = game.currentCombatRound.timeRemaining ();
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
-		if (game.currentTriviaRound.correct) {
+		if (game.currentTriviaRound.playerAttacks (computer)) {
 			setButtonsText (new string[] { "DRAG THE SWORD BLOCK TO CLAIM AN AREA TO ATTACK",
 				"OVERLAP WITH THE STAR BLOCK TO DO MORE DAMAGE",
 				"OVERLAP WITH THE SHIELD WILL DO NO DAMAGE",
