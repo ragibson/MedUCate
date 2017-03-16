@@ -8,6 +8,13 @@ public class CombatRound
 	public float roundTime;
 	private float currentTime = 0;
 	private float damage;
+
+	/*
+	 * 	These are the healths at the start of the round
+	 * 
+	 * 	These are *NOT* updated with damageCalc; use the values
+	 * 	from Game for that purpose.
+	 */
 	public float playerHealth;
 	public float enemyHealth;
 

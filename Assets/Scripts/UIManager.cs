@@ -152,9 +152,8 @@ public class UIManager : MonoBehaviour
 		"QUICK PLAY -\n" +
 		"PLAY YOUR SELECTED QUESTIONS\n" +
 		"AGAINST A COMPUTER OPPONENT\n\n" +
-		"TRAINING -\n" +
-		"NO COMBAT, JUST A NUMBER OF\n" +
-		"ROUNDS TO PRACTICE QUESTIONS\n\n" +
+		"TUTORIAL -\n" +
+		"LEARN HOW TO PLAY\n\n" +
 		"CAMPAIGN -\n" +
 		"IF YOU CAN COMPLETE ALL THE\n" +
 		"LEVELS, THEN YOU HAVE\n" +
@@ -227,7 +226,7 @@ public class UIManager : MonoBehaviour
 			"<<< BACK TO SINGLEPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
+			singlePlayerQuickPlayStartGame,
 			computer.changeDifficulty,
 			computer.changeSpeed,
 			singlePlayer
@@ -247,6 +246,12 @@ public class UIManager : MonoBehaviour
 		String.Format ("\n(OPTION {0} OF {1})", computer.speed + 1, computer.speeds.Length));
 
 		currentMenu = singlePlayerQuickPlay;
+	}
+
+	void singlePlayerQuickPlayStartGame ()
+	{
+		gameLogic.gameMode = "Single Player Quick Play";
+		currentMenu = startGame;
 	}
 
 	void tutorialStart ()
@@ -361,12 +366,7 @@ public class UIManager : MonoBehaviour
 	// Setup for next tutorial menu
 	void tutorialCombat1 ()
 	{	
-		/*
-		 * 	200 HP
-		 * 	10 seconds per round
-		 * 	25 damage per attack
-		 */	
-		game = new Game (200, 10, 25);
+		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
 
 		RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
 		gameLogic.randomlyPlaceStar (bounds, objects);
@@ -435,12 +435,7 @@ public class UIManager : MonoBehaviour
 	// Setup for next tutorial menu
 	void tutorialCombat4 ()
 	{
-		/*
-		 * 	200 HP
-		 * 	10 seconds per round
-		 * 	25 damage per attack
-		 */	
-		game = new Game (200, 10, 25);
+		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
 
 		RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
 		gameLogic.randomlyPlaceStar (bounds, objects);
@@ -480,6 +475,13 @@ public class UIManager : MonoBehaviour
 	void endTutorial ()
 	{
 		objectVisibility (false, false, false);
+		gameLogic.gameMode = "Tutorial";
+		gameLogic.displayText = gameLogic.changeReputation ();
+		currentMenu = finalTutorialScreen;
+	}
+
+	void finalTutorialScreen ()
+	{
 		setButtonsText (new string[] { "",
 			"", 
 			"TO MAIN MENU>>>",
@@ -499,9 +501,10 @@ public class UIManager : MonoBehaviour
 		"OR THE SINGLEPLAYER CAMPAIGN\n\n" +
 		"IF YOU'RE CONFIDENT IN YOUR SKILLS\n" +
 		"TRY JUMPING STRAIGHT INTO MULTIPLAYER\n\n" +
-		"HAVE FUN!");
+		"HAVE FUN!\n\n" +
+		gameLogic.displayText);
 
-		currentMenu = endTutorial;
+		currentMenu = finalTutorialScreen;
 	}
 
 	void singlePlayerCampaign ()
@@ -537,7 +540,7 @@ public class UIManager : MonoBehaviour
 
 	void startCampaign ()
 	{
-		gameLogic.inCampaign = true;
+		gameLogic.gameMode = "Campaign";
 		currentMenu = startGame;
 	}
 
@@ -601,13 +604,18 @@ public class UIManager : MonoBehaviour
 
 	void multiPlayerOneManArmy ()
 	{
-		setButtonsText (new string[] { "<<< START GAME >>>",
+		string startGameText = "<<< START GAME >>>";
+		if (gameLogic.reputation < settings.getWager ()) {
+			startGameText = "<<< NOT ENOUGH REPUTATION TO WAGER >>>";
+		}
+
+		setButtonsText (new string[] { startGameText,
 			"<<< SHOW LEADERBOARD >>>", 
 			"CHANGE WAGER >>>",
 			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
+			oneManArmyStartGame,
 			leaderboardLoad,
 			settings.changeWager,
 			multiPlayer
@@ -620,13 +628,26 @@ public class UIManager : MonoBehaviour
 		"DEFAULT NUTRITIONAL HEALTH SET\n" +
 		"(THESE CHANGE EVERY DAY)\n\n" +
 		"CURRENT REPUTATION -\n" +
-		"1000\n" +
+		String.Format ("{0}\n", gameLogic.reputation) +
 		"(THIS CHANGES AS YOU PLAY MORE GAMES)\n\n" +
 		"CURRENT WAGER -\n" +
 		settings.getWagerString () +
-		String.Format ("\n(OPTION {0} OF {1})", settings.wager + 1, settings.wagers.Length));
+		String.Format ("\n(OPTION {0} OF {1})", settings.wagerIndex + 1, settings.wagers.Length));
 
 		currentMenu = multiPlayerOneManArmy;
+	}
+
+	void oneManArmyStartGame ()
+	{
+		if (gameLogic.reputation >= settings.getWager ()) {
+			
+			// Computer is Hard, Moderate Speed for One Man Army
+			computer.level = 7;
+			computer.getLevelString ();
+
+			gameLogic.gameMode = "One Man Army";
+			currentMenu = startGame;
+		}
 	}
 
 	string leaderboardURL = "http://www.unc.edu/~ragibson/leaderboardtest.txt";
@@ -777,12 +798,7 @@ public class UIManager : MonoBehaviour
 
 	void startGame ()
 	{
-		/*
-		 * 	200 HP
-		 * 	10 seconds per round
-		 * 	25 damage per attack
-		 */
-		game = new Game (200, 10, 25);
+		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
 		currentMenu = continueGame;
 	}
 
@@ -794,23 +810,30 @@ public class UIManager : MonoBehaviour
 
 	void endGame ()
 	{
+		gameLogic.displayText = "";
+
+		if (game.playerHealth <= 0) {
+			setDisplayColor (Color.red);
+			gameLogic.displayText += "YOU LOSE!\n\n";
+		} else {
+			// Dark Green
+			setDisplayColor (new Color (0.0f, 0.5f, 0.0f));
+			gameLogic.displayText += "YOU WIN!\n\n";
+		}
+
+		gameLogic.displayText += gameLogic.changeReputation (game.playerHealth);
+
+		currentMenu = endGameScreen;
+	}
+
+	void endGameScreen ()
+	{
 		setDisplayImage (images [5]);
 
 		slider.value -= Time.deltaTime;
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
-		if (game.playerHealth == 0) {
-			setDisplayColor (Color.red);
-			setDisplayText ("YOU LOSE!");
-		} else {
-			// Dark Green
-			setDisplayColor (new Color (0.0f, 0.5f, 0.0f));
-			setDisplayText ("YOU WIN!");
-			if (gameLogic.inCampaign) {
-				gameLogic.campaignScores [computer.level] = (int)Math.Round (game.currentCombatRound.playerHealth);
-				gameLogic.inCampaign = false;
-			}
-		}
+		setDisplayText (gameLogic.displayText);
 
 		if (slider.value <= 0) {
 			slider.value = game.roundTime / 2;
@@ -936,6 +959,33 @@ public class UIManager : MonoBehaviour
 			currentMenu = endGame;
 		} else {
 			currentMenu = continueGame;
+		}
+	}
+
+	public void debugWipeAllSettings ()
+	{
+		slider.value = 10;
+		currentMenu = wipeSettingsVerification;
+	}
+
+	void wipeSettingsVerification ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.red);
+
+		setDisplayText (String.Format ("WIPING *ALL* LOCAL USER DATA IN\n{0} SECONDS!\n\n", Mathf.Round (slider.value)) +
+		"IF THIS IS NOT INTENDED, EXIT THE APP IMMEDIATELY"
+		);
+
+		if (slider.value > 0) {
+			currentMenu = wipeSettingsVerification;
+		} else {
+			slider.value = 5;
+			gameLogic.deleteAllPrefs ();
+			currentMenu = mainMenu;
 		}
 	}
 }
