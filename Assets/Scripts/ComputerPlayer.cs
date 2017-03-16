@@ -174,7 +174,7 @@ public class ComputerPlayer
 
 		// Within 50% of the star center
 		Vector3 starOverlapPosition = new Vector3 (objects [2].transform.position.x + UnityEngine.Random.Range (-50, 50) * maxXDisplacement / 100,
-			objects [2].transform.position.y + UnityEngine.Random.Range (-50, 50) * maxYDisplacement / 100, 0);
+			                              objects [2].transform.position.y + UnityEngine.Random.Range (-50, 50) * maxYDisplacement / 100, 0);
 
 		objects [0].transform.position = new Vector3 (starOverlapPosition [0], starOverlapPosition [1], objects [0].transform.position.z);
 

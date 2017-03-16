@@ -8,8 +8,8 @@ public class GameLogicManager : MonoBehaviour
 
 	/*
 	 * 	TODO: Remove hardcoded Question Sets
-	 *
-	 * 	TODO: Maintain settings past exiting app
+	 * 
+	 * 	TODO: Handle usernames
 	 */
 
 	/*
@@ -20,6 +20,8 @@ public class GameLogicManager : MonoBehaviour
 	public int gameHP;
 	public int secondsPerRound;
 	public int damagePerAttack;
+
+	public bool debugDeleteAllSettings;
 
 	public bool completedTutorial;
 	public int reputation;
@@ -47,17 +49,127 @@ public class GameLogicManager : MonoBehaviour
 	{
 		// TODO: Remove hardcoded Question Sets
 		questionSets = prototypeQuestionSets ();
-		setCurrentSet (0);
 
-		// TODO: Get these from a settings file
-		campaignScores = new int[9];
-		for (int i = 0; i < 9; i++) {
-			campaignScores [i] = 0;
+		getPlayerPrefs ();
+
+		if (debugDeleteAllSettings) {
+			UIManager UI = GameObject.Find ("UI").GetComponent<UIManager> ();
+			UI.currentMenu = UI.debugWipeAllSettings;
 		}
 
-		reputation = 0;
+	}
 
+	public string getCampaignScore (int level)
+	{
+		if (campaignScores [level] == 0) {
+			return "NOT YET COMPLETED";
+		}
+		return String.Format ("HIGH SCORE: {0}/200", campaignScores [level]);
+	}
+
+	// Returns whether player got a high score
+	public bool updateCampaign (float finalHP)
+	{
+		if (String.Equals (this.gameMode, "Campaign")) {
+			int score = (int)Mathf.Round (finalHP);
+
+			// If the player gets a new high score, we update their scores and reputation
+			if (score > this.campaignScores [computer.level]) {
+				this.campaignScores [computer.level] = score;
+				updatePlayerPrefs ();
+				return true;
+			}
+
+		}
+		return false;
+	}
+
+	// Saves settings to file
+	public void updatePlayerPrefs ()
+	{
+		// TODO: Handle usernames
+		PlayerPrefs.SetString ("Username", "NEW_USER");
+		PlayerPrefs.SetInt ("Completed Tutorial", (completedTutorial ? 1 : 0));
+		PlayerPrefs.SetInt ("Reputation", reputation);
+		for (int i = 0; i < 9; i++) {
+			PlayerPrefs.SetInt (String.Format ("Campaign{0}", i), campaignScores [i]);
+		}
+		PlayerPrefs.SetInt ("Selected Question Set", selectedSet);
+		PlayerPrefs.Save ();
+	}
+
+	// Reads settings from file
+	public void getPlayerPrefs ()
+	{
+		// TODO: Handle usernames
+		campaignScores = new int[9];
+
+		completedTutorial = (PlayerPrefs.GetInt ("Completed Tutorial") == 1);
+		reputation = PlayerPrefs.GetInt ("Reputation");
+		for (int i = 0; i < 9; i++) {
+			campaignScores [i] = PlayerPrefs.GetInt (String.Format ("Campaign{0}", i));
+		}
+		selectedSet = PlayerPrefs.GetInt ("Selected Question Set");
+
+		setCurrentSet (selectedSet);
+	}
+
+	public void deleteAllPrefs ()
+	{
+		PlayerPrefs.DeleteAll ();
+
+		campaignScores = new int[9];
+		reputation = 0;
 		completedTutorial = false;
+		selectedSet = 0;
+
+		updatePlayerPrefs ();
+		getPlayerPrefs ();
+	}
+
+	/*
+	 * 	Returns string to display after game ends.
+	 * 	This includes change in reputation and campaign high score notification.
+	 * 
+	 * 	Tutorial gives 500 reputation on first completion.
+	 * 
+	 * 	Campaign gives 20-100 reputation on new high score, depending on level.
+	 */
+	public string changeReputation (float finalHP = 0)
+	{
+		string displayText = "";
+
+		int reputationChange = 0;
+		if (String.Equals (this.gameMode, "Tutorial") && !completedTutorial) {
+			completedTutorial = true;
+			reputationChange += 500;
+		} else if (String.Equals (this.gameMode, "Campaign")) {
+			if (updateCampaign (finalHP)) {
+				displayText += String.Format ("CAMPAIGN LEVEL {0}\nNEW HIGH SCORE: {1}\n\n", computer.level + 1, finalHP);
+				reputationChange += 10 * (2 + computer.level);
+			}
+		} else if (String.Equals (this.gameMode, "One Man Army")) {
+			if (finalHP <= 0) {
+				reputationChange -= settings.getWager ();
+			} else {
+				reputationChange += settings.getWager ();
+			}
+		}
+
+		displayText += "Reputation ";
+		if (reputationChange >= 0) {
+			displayText += "+";
+		}
+		displayText += "" + reputationChange;
+		reputation += reputationChange;
+
+		displayText += String.Format ("\n\n Current Reputation: {0}", reputation);
+
+		this.gameMode = "";
+
+		updatePlayerPrefs ();
+
+		return displayText;
 	}
 
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
@@ -69,6 +181,8 @@ public class GameLogicManager : MonoBehaviour
 		selectedSet = i;
 		settings.selected = questionSets [selectedSet];
 		questionSets [selectedSet].selected = true;
+
+		updatePlayerPrefs ();
 	}
 
 	public void increaseCurrentSet ()
@@ -162,72 +276,6 @@ public class GameLogicManager : MonoBehaviour
 			                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
 			                          objects [2].transform.position.z);
 		objects [2].transform.position = randomPlacement;
-	}
-
-	public string getCampaignScore (int level)
-	{
-		if (campaignScores [level] == 0) {
-			return "NOT YET COMPLETED";
-		}
-		return String.Format ("HIGH SCORE: {0}/200", campaignScores [level]);
-	}
-
-	// Returns whether player got a high score
-	public bool updateCampaign (float finalHP)
-	{
-		if (String.Equals (this.gameMode, "Campaign")) {
-			int score = (int)Mathf.Round (finalHP);
-
-			// If the player gets a new high score, we update their scores and reputation
-			if (score > this.campaignScores [computer.level]) {
-				this.campaignScores [computer.level] = score;
-				return true;
-			}
-
-		}
-		return false;
-	}
-
-	/*
-	 * 	Returns string to display after game ends.
-	 * 	This includes change in reputation and campaign high score notification.
-	 * 
-	 * 	Tutorial gives 500 reputation on first completion.
-	 * 
-	 * 	Campaign gives 20-100 reputation on new high score, depending on level.
-	 */
-	public string changeReputation (float finalHP = 0)
-	{
-		string displayText = "";
-
-		int reputationChange = 0;
-		if (String.Equals (this.gameMode, "Tutorial") && !completedTutorial) {
-			completedTutorial = true;
-			reputationChange += 500;
-		} else if (String.Equals (this.gameMode, "Campaign")) {
-			if (updateCampaign (finalHP)) {
-				displayText += String.Format ("CAMPAIGN LEVEL {0}\nNEW HIGH SCORE: {1}\n\n", computer.level + 1, finalHP);
-				reputationChange += 10 * (2 + computer.level);
-			}
-		} else if (String.Equals (this.gameMode, "One Man Army")) {
-			if (finalHP <= 0) {
-				reputationChange -= settings.getWager ();
-			} else {
-				reputationChange += settings.getWager ();
-			}
-		}
-
-		displayText += "Reputation ";
-		if (reputationChange >= 0) {
-			displayText += "+";
-		}
-		displayText += "" + reputationChange;
-		reputation += reputationChange;
-
-		displayText += String.Format ("\n\n Current Reputation: {0}", reputation);
-
-		this.gameMode = "";
-		return displayText;
 	}
 
 	// ===== HARD CODED QUESTION SETS FROM PROTOTYPE ===== //

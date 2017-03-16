@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class TriviaRound
 {
-	/*
-	 * 	TODO: If neither player answers correctly, skip combat
-	 */
-
 	public float roundTime;
 
 	private Question currentQuestion;

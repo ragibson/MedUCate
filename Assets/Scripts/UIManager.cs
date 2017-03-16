@@ -152,9 +152,8 @@ public class UIManager : MonoBehaviour
 		"QUICK PLAY -\n" +
 		"PLAY YOUR SELECTED QUESTIONS\n" +
 		"AGAINST A COMPUTER OPPONENT\n\n" +
-		"TRAINING -\n" +
-		"NO COMBAT, JUST A NUMBER OF\n" +
-		"ROUNDS TO PRACTICE QUESTIONS\n\n" +
+		"TUTORIAL -\n" +
+		"LEARN HOW TO PLAY\n\n" +
 		"CAMPAIGN -\n" +
 		"IF YOU CAN COMPLETE ALL THE\n" +
 		"LEVELS, THEN YOU HAVE\n" +
@@ -600,7 +599,7 @@ public class UIManager : MonoBehaviour
 	void multiPlayerOneManArmy ()
 	{
 		string startGameText = "<<< START GAME >>>";
-		if (gameLogic.reputation < settings.getWager()) {
+		if (gameLogic.reputation < settings.getWager ()) {
 			startGameText = "<<< NOT ENOUGH REPUTATION TO WAGER >>>";
 		}
 
@@ -634,7 +633,7 @@ public class UIManager : MonoBehaviour
 
 	void oneManArmyStartGame ()
 	{
-		if (gameLogic.reputation >= settings.getWager()) {
+		if (gameLogic.reputation >= settings.getWager ()) {
 			
 			// Computer is Hard, Moderate Speed for One Man Army
 			computer.level = 7;
@@ -954,6 +953,33 @@ public class UIManager : MonoBehaviour
 			currentMenu = endGame;
 		} else {
 			currentMenu = continueGame;
+		}
+	}
+
+	public void debugWipeAllSettings ()
+	{
+		slider.value = 10;
+		currentMenu = wipeSettingsVerification;
+	}
+
+	void wipeSettingsVerification ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.red);
+
+		setDisplayText (String.Format ("WIPING *ALL* LOCAL USER DATA IN\n{0} SECONDS!\n\n", Mathf.Round (slider.value)) +
+		"IF THIS IS NOT INTENDED, EXIT THE APP IMMEDIATELY"
+		);
+
+		if (slider.value > 0) {
+			currentMenu = wipeSettingsVerification;
+		} else {
+			slider.value = 5;
+			gameLogic.deleteAllPrefs ();
+			currentMenu = mainMenu;
 		}
 	}
 }

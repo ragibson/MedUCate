@@ -11,14 +11,16 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 ## TODO
   * Networking
     * Manage leaderboard on server
+    * Handle Question Sets on server
     * Handle activationCode
     * Handle expiryTime
     * Handle multiplayer
+    * Handle usernames
+    * Verify user information with server on startup
   * General
     * Multiplayer timeouts and randomized AIs
   * GameLogicManager.cs
     * Remove hardcoded Question Sets
-    * Retrieve settings from file on startup
   * UIManager.cs
     * Implement "ADD QUESTIONS"
     * Implement "VIEW HISTORY"
