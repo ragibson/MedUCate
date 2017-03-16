@@ -226,7 +226,7 @@ public class UIManager : MonoBehaviour
 			"<<< BACK TO SINGLEPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
+			singlePlayerQuickPlayStartGame,
 			computer.changeDifficulty,
 			computer.changeSpeed,
 			singlePlayer
@@ -246,6 +246,12 @@ public class UIManager : MonoBehaviour
 		String.Format ("\n(OPTION {0} OF {1})", computer.speed + 1, computer.speeds.Length));
 
 		currentMenu = singlePlayerQuickPlay;
+	}
+
+	void singlePlayerQuickPlayStartGame ()
+	{
+		gameLogic.gameMode = "Single Player Quick Play";
+		currentMenu = startGame;
 	}
 
 	void tutorialStart ()

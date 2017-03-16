@@ -134,6 +134,10 @@ public class GameLogicManager : MonoBehaviour
 	 * 	Tutorial gives 500 reputation on first completion.
 	 * 
 	 * 	Campaign gives 20-100 reputation on new high score, depending on level.
+	 * 
+	 * 	One Many Army awards and detracts reputation based on wager and win/loss result.
+	 * 
+	 * 	Single Player Quick Play awards 10-50 reputation on win, depending on level.
 	 */
 	public string changeReputation (float finalHP = 0)
 	{
@@ -153,6 +157,11 @@ public class GameLogicManager : MonoBehaviour
 				reputationChange -= settings.getWager ();
 			} else {
 				reputationChange += settings.getWager ();
+			}
+		} else if (String.Equals (this.gameMode, "Single Player Quick Play")) {
+			if (finalHP > 0) {
+				int level = 3 * computer.difficulty + computer.speed;
+				reputationChange += 5 * (2 + level);
 			}
 		}
 
