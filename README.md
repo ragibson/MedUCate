@@ -7,7 +7,7 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
   * [Requirements](#Requirements)
   * [Installation](#Installation)
 
-<a name = "TODO"/>
+<a name = "TODO"></a>
 ## TODO
   * General
     * Networking for Multiplayer (including leaderboard)
@@ -26,11 +26,11 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
     * Implement "HOST GAME"
     * Implement "JOIN GAME"
     * (Nonessential) XML parser for menus
-  
-<a name = "Requirements"/>
+
+<a name = "Requirements"></a>
 ## Requirements
 Should work natively on Unity versions >= 5.5.1f1, but will be compatible with most recent versions of Unity if packaged.
-  
-<a name = "Installation"/>
+
+<a name = "Installation"></a>
 ## Installation
 Simply importing all the assets into a new Unity project and opening the Main scene should suffice.
