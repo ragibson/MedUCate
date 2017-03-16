@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,20 @@ public class GameLogicManager : MonoBehaviour
 	 *
 	 * 	TODO: Maintain settings past exiting app
 	 */
+
+	/*
+	 *	In initial prototype, these were set to 200, 10, and 25, respectively.
+	 *
+	 *	Should consider shortening game length by changing these.
+	 */
+	public int gameHP;
+	public int secondsPerRound;
+	public int damagePerAttack;
+
+	public bool completedTutorial;
+	public int reputation;
+
+	public string displayText = "";
 
 	public Settings settings = new Settings ();
 	public ComputerPlayer computer = new ComputerPlayer ();
@@ -24,7 +39,7 @@ public class GameLogicManager : MonoBehaviour
 	public bool hideAnswers = false;
 
 	// ===   Campaign High Scores   === //
-	public bool inCampaign = false;
+	public string gameMode = "";
 	public int[] campaignScores;
 
 	// Initialization
@@ -39,6 +54,10 @@ public class GameLogicManager : MonoBehaviour
 		for (int i = 0; i < 9; i++) {
 			campaignScores [i] = 0;
 		}
+
+		reputation = 0;
+
+		completedTutorial = false;
 	}
 
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
@@ -145,11 +164,70 @@ public class GameLogicManager : MonoBehaviour
 		objects [2].transform.position = randomPlacement;
 	}
 
-	public string getCampaignScore(int level) {
+	public string getCampaignScore (int level)
+	{
 		if (campaignScores [level] == 0) {
 			return "NOT YET COMPLETED";
 		}
-		return string.Format("HIGH SCORE: {0}/200", campaignScores [level]);
+		return String.Format ("HIGH SCORE: {0}/200", campaignScores [level]);
+	}
+
+	// Returns whether player got a high score
+	public bool updateCampaign (float finalHP)
+	{
+		if (String.Equals (this.gameMode, "Campaign")) {
+			int score = (int)Mathf.Round (finalHP);
+
+			// If the player gets a new high score, we update their scores and reputation
+			if (score > this.campaignScores [computer.level]) {
+				this.campaignScores [computer.level] = score;
+				return true;
+			}
+
+		}
+		return false;
+	}
+
+	/*
+	 * 	Returns string to display after game ends.
+	 * 	This includes change in reputation and campaign high score notification.
+	 * 
+	 * 	Tutorial gives 500 reputation on first completion.
+	 * 
+	 * 	Campaign gives 20-100 reputation on new high score, depending on level.
+	 */
+	public string changeReputation (float finalHP = 0)
+	{
+		string displayText = "";
+
+		int reputationChange = 0;
+		if (String.Equals (this.gameMode, "Tutorial") && !completedTutorial) {
+			completedTutorial = true;
+			reputationChange += 500;
+		} else if (String.Equals (this.gameMode, "Campaign")) {
+			if (updateCampaign (finalHP)) {
+				displayText += String.Format ("CAMPAIGN LEVEL {0}\nNEW HIGH SCORE: {1}\n\n", computer.level + 1, finalHP);
+				reputationChange += 10 * (2 + computer.level);
+			}
+		} else if (String.Equals (this.gameMode, "One Man Army")) {
+			if (finalHP <= 0) {
+				reputationChange -= settings.getWager ();
+			} else {
+				reputationChange += settings.getWager ();
+			}
+		}
+
+		displayText += "Reputation ";
+		if (reputationChange >= 0) {
+			displayText += "+";
+		}
+		displayText += "" + reputationChange;
+		reputation += reputationChange;
+
+		displayText += String.Format ("\n\n Current Reputation: {0}", reputation);
+
+		this.gameMode = "";
+		return displayText;
 	}
 
 	// ===== HARD CODED QUESTION SETS FROM PROTOTYPE ===== //

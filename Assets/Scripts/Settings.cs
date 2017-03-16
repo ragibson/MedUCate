@@ -28,7 +28,7 @@ public class Settings
 	};
 
 	// === Multiplayer One Man Army === //
-	public int wager = 0;
+	public int wagerIndex = 0;
 	public int[] wagers = new int[] { 1, 2, 5, 10, 20, 50, 100, 200, 500 };
 
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING  === //
@@ -54,8 +54,12 @@ public class Settings
 
 	public void changeWager ()
 	{
-		wager += 1;
-		wager %= wagers.Length;
+		wagerIndex += 1;
+		wagerIndex %= wagers.Length;
+	}
+
+	public int getWager() {
+		return wagers [wagerIndex];
 	}
 
 	public string getLengthString ()
@@ -75,6 +79,6 @@ public class Settings
 
 	public string getWagerString ()
 	{
-		return "WIN/LOSE " + wagers [wager] + " REP";
+		return "WIN/LOSE " + wagers [wagerIndex] + " REP";
 	}
 }
