@@ -34,6 +34,7 @@ public class UIManager : MonoBehaviour
 	public Sprite[] images;
 	private Action[] buttonBehaviors;
 
+	// objects = [sword, shield, star]
 	public GameObject[] objects;
 
 	public Action currentMenu;
@@ -97,11 +98,17 @@ public class UIManager : MonoBehaviour
 	/*
 	 * 	Sets the button's texts to match the passed string[]
 	 * 
+	 * 	If button text is empty, we make that button uniteractable
+	 * 
 	 * 	params:
 	 * 		buttonText: string[] of [Button1Text, ...]
 	 */
 	void setButtonsText (string[] buttonText)
 	{
+		for (int i = 0; i < 4; i++) {
+			buttons [i].interactable = !String.Equals (buttonText [i], "");
+		}
+
 		for (int i = 0; i < buttons.Length; i++) {
 			buttons [i].GetComponentInChildren<Text> ().text = buttonText [i];
 		}
@@ -257,7 +264,7 @@ public class UIManager : MonoBehaviour
 	void tutorialStart ()
 	{
 		objectVisibility (false, false, false);
-		setButtonsText (new string[] { "THESE BUTTONS WILL ALWAYS HAVE HELPFUL TEXT",
+		setButtonsText (new string[] { "THESE BUTTONS WILL HAVE HELPFUL TEXT",
 			"OR DESCRIBE THE BUTTON'S ACTION", 
 			"PROCEED >>>",
 			"<<< BACK TO SINGLEPLAYER"
@@ -283,8 +290,8 @@ public class UIManager : MonoBehaviour
 	void tutorialTrivia ()
 	{
 		objectVisibility (false, false, false);
-		setButtonsText (new string[] { "THESE BUTTONS WILL LIST ANSWERS TO THE QUESTION",
-			"ONE WILL BE CORRECT AND THREE WILL BE INCORRECT", 
+		setButtonsText (new string[] { "ANSWERS WILL BE LISTED HERE",
+			"ONLY ONE WILL BE CORRECT", 
 			"PROCEED >>>",
 			"<<< PREVIOUS MENU"
 		});
@@ -905,17 +912,17 @@ public class UIManager : MonoBehaviour
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
 		if (game.currentTriviaRound.playerAttacks (computer)) {
-			setButtonsText (new string[] { "DRAG THE SWORD BLOCK TO CLAIM AN AREA TO ATTACK",
-				"OVERLAP WITH THE STAR BLOCK TO DO MORE DAMAGE",
-				"OVERLAP WITH THE SHIELD WILL DO NO DAMAGE",
-				"PLACE IT WHERE YOUR OPPONENT WON'T DEFEND"
+			setButtonsText (new string[] { "",
+				"",
+				"",
+				""
 			});
 			objectVisibility (true, false, true);
 		} else {
-			setButtonsText (new string[] { "DRAG THE SHIELD BLOCK TO CLAIM AN AREA TO DEFEND",
-				"OVERLAP WITH THE SWORD BLOCK TO NEGATE DAMAGE",
-				"THE STAR BLOCK IS A TEMPTING AREA TO ATTACK",
-				"PLACE IT WHERE YOUR OPPONENT WILL ATTACK"
+			setButtonsText (new string[] { "",
+				"",
+				"",
+				""
 			});
 			objectVisibility (false, true, true);
 		}
@@ -953,11 +960,21 @@ public class UIManager : MonoBehaviour
 		});
 
 		if (slider.value > 0) {
+
+			// Make the sword and shield uninteractable at this point
+			objects [0].GetComponent<Draggable> ().draggingEnabled = false;
+			objects [1].GetComponent<Draggable> ().draggingEnabled = false;
+
 			currentMenu = combatResults;
 		} else if (game.playerHealth < 1 || game.enemyHealth < 1) {
 			slider.value = game.roundTime / 2;
 			currentMenu = endGame;
 		} else {
+
+			// Restore ability to drag objects around for later rounds
+			objects [0].GetComponent<Draggable> ().draggingEnabled = true;
+			objects [1].GetComponent<Draggable> ().draggingEnabled = true;
+
 			currentMenu = continueGame;
 		}
 	}

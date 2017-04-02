@@ -18,6 +18,9 @@ public class Draggable : MonoBehaviour
 	private float maxXDisplacement;
 	private float maxYDisplacement;
 
+	// Used to disable dragging on object
+	public bool draggingEnabled = true;
+
 	/*
 	 *	Runs once on first frame of game
 	 *	Used to initialize size of blocks
@@ -37,9 +40,11 @@ public class Draggable : MonoBehaviour
 	 */
 	void OnMouseDrag ()
 	{
-		Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		this.transform.position = new Vector3 (mousePos.x, mousePos.y, this.transform.position.z);
-		forceInBounds ();
+		if (draggingEnabled) {
+			Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+			this.transform.position = new Vector3 (mousePos.x, mousePos.y, this.transform.position.z);
+			forceInBounds ();
+		}
 	}
 
 	// Move Draggable object's location to be within the bounds of the Draggable area
