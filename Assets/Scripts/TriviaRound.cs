@@ -34,17 +34,34 @@ public class TriviaRound
 		answerTime = roundTime;
 	}
 
+	bool addedExtraTime = false;
+
 	public void Update ()
 	{
 		currentTime += Time.deltaTime;
-		if (timeRemaining () < 0) {
+		if (timeRemaining () < 3 && answerTime != roundTime &&
+		    answerTime >= (roundTime - 3) && !addedExtraTime) {
+			/*
+			 * 	If the player answers with less than three seconds to go, we give 
+			 * 	them some extra time to read the results of the round
+			 */
+			addedExtraTime = true;
+			currentTime = roundTime - 3;
+		} else if (timeRemaining () < 0 && answerTime == roundTime && !addedExtraTime) {
+			/*
+			 * 	If the player does not answer at all, we also give them some extra
+			 * 	time to read the results of the round
+			 */
+			addedExtraTime = true;
+			currentTime = roundTime - 3;
+		} else if (timeRemaining () < 0) {
 			proceedToCombat = true;
 		}
 	}
 
 	public bool answered ()
 	{
-		return answerTime < roundTime;
+		return answerTime < roundTime || addedExtraTime;
 	}
 
 	public void answerChosen (int i)
@@ -91,13 +108,23 @@ public class TriviaRound
 			actionText = "COMBAT WILL BE SKIPPED!";
 		}
 
+		string playerAnswerTimeText = string.Format ("YOUR CHOICE WAS {0}\n" +
+		                              "YOU ANSWERED IN {1} SECONDS\n\n", choice, answerTime);
+		string computerAnswerTimeText = string.Format ("YOUR OPPONENT ANSWERED {0}\n" +
+		                                "IN {1} SECONDS\n\n", computerChoice, computerTime);
+
+		if (answerTime == roundTime) {
+			playerAnswerTimeText = "YOU DID NOT ANSWER\n\n";
+		}
+		if (computerTime == roundTime) {
+			computerAnswerTimeText = "YOUR OPPONENT DID NOT ANSWER\n\n";
+		}
+
 		return string.Format ("THE ANSWER WAS\n\n" +
 		"{0}\n\n" +
-		"YOUR CHOICE WAS {1}\n" +
-		"YOU ANSWERED IN {2} SECONDS\n\n" +
-		"YOUR OPPONENT ANSWERED {3}\n" +
-		"IN {4} SECONDS\n\n" +
-		actionText, correctAnswer, choice, answerTime, computerChoice, computerTime, action);
+		playerAnswerTimeText +
+		computerAnswerTimeText +
+		actionText, correctAnswer);
 	}
 
 	public bool roundOver ()
