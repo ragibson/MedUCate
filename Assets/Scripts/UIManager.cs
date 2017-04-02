@@ -15,6 +15,11 @@ public class UIManager : MonoBehaviour
 	 * 		HOST GAME
 	 * 		JOIN GAME
 	 * 
+	 * 	TODO: Add server-based multiplayer
+	 * 
+	 * 	TODO: Add text field for pulling from server using 
+	 * 	question set code in "Add Questions" menu
+	 * 
 	 * 	TODO: LEADERBOARD needs to be connected
 	 * 	to the server once networking  for the
 	 * 	game is more complete.
@@ -34,6 +39,7 @@ public class UIManager : MonoBehaviour
 	public Sprite[] images;
 	private Action[] buttonBehaviors;
 
+	// objects = [sword, shield, star]
 	public GameObject[] objects;
 
 	public Action currentMenu;
@@ -97,11 +103,17 @@ public class UIManager : MonoBehaviour
 	/*
 	 * 	Sets the button's texts to match the passed string[]
 	 * 
+	 * 	If button text is empty, we make that button uniteractable
+	 * 
 	 * 	params:
 	 * 		buttonText: string[] of [Button1Text, ...]
 	 */
 	void setButtonsText (string[] buttonText)
 	{
+		for (int i = 0; i < 4; i++) {
+			buttons [i].interactable = !String.Equals (buttonText [i], "");
+		}
+
 		for (int i = 0; i < buttons.Length; i++) {
 			buttons [i].GetComponentInChildren<Text> ().text = buttonText [i];
 		}
@@ -198,15 +210,14 @@ public class UIManager : MonoBehaviour
 			"REVIEW QUESTIONS >>>",
 			"<<< BACK TO MENU"
 		});
-		setButtonBehaviors (new Action[] { changeQuestions, noMenu, reviewQuestions, mainMenu });
+		setButtonBehaviors (new Action[] { changeQuestions, addQuestions, reviewQuestions, mainMenu });
 
 		setDisplayImage (images [3]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > PROFILE\n\n" +
 		"CHANGE QUESTIONS -\n" +
-		"CHANGE YOUR CURRENT QUESTION\n" +
-		"SET AND RESETS THE\n" +
-		"CAMPAIGN PROGRESS\n\n" +
+		"CHANGE YOUR CURRENT\n" +
+		"QUESTION SET\n\n" +
 		"ADD QUESTIONS -\n" +
 		"IMPORT YOUR OWN QUESTIONS\n" +
 		"FROM A CODE TO CUSTOMIZE\n" +
@@ -216,6 +227,29 @@ public class UIManager : MonoBehaviour
 		"CURRENT QUESTION SET");
 
 		currentMenu = profile;
+	}
+
+	/*
+	 * 	TODO: Add text field for pulling from server using question set 
+	 * 	code in "Add Questions" menu
+	 */
+	void addQuestions ()
+	{
+		setButtonsText (new string[] {
+			"",
+			"",
+			"",
+			"<<< BACK TO PROFILE"
+		});
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, profile });
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Go to\n" +
+		"www.websitewillgohere.com\n" +
+		"to update and add question sets!");
+
+		currentMenu = addQuestions;
 	}
 
 	void singlePlayerQuickPlay ()
@@ -257,7 +291,7 @@ public class UIManager : MonoBehaviour
 	void tutorialStart ()
 	{
 		objectVisibility (false, false, false);
-		setButtonsText (new string[] { "THESE BUTTONS WILL ALWAYS HAVE HELPFUL TEXT",
+		setButtonsText (new string[] { "THESE BUTTONS WILL HAVE HELPFUL TEXT",
 			"OR DESCRIBE THE BUTTON'S ACTION", 
 			"PROCEED >>>",
 			"<<< BACK TO SINGLEPLAYER"
@@ -283,8 +317,8 @@ public class UIManager : MonoBehaviour
 	void tutorialTrivia ()
 	{
 		objectVisibility (false, false, false);
-		setButtonsText (new string[] { "THESE BUTTONS WILL LIST ANSWERS TO THE QUESTION",
-			"ONE WILL BE CORRECT AND THREE WILL BE INCORRECT", 
+		setButtonsText (new string[] { "ANSWERS WILL BE LISTED HERE",
+			"ONLY ONE WILL BE CORRECT", 
 			"PROCEED >>>",
 			"<<< PREVIOUS MENU"
 		});
@@ -552,7 +586,7 @@ public class UIManager : MonoBehaviour
 			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
+			multiPlayerQuickPlayStartGame,
 			noMenu,
 			settings.changeMultiPlayerType,
 			multiPlayer
@@ -572,6 +606,68 @@ public class UIManager : MonoBehaviour
 		String.Format ("\n(OPTION {0} OF {1})\n\n", settings.multiplayerMode + 1, settings.multiplayerModes.Length));
 
 		currentMenu = multiPlayerQuickPlay;
+	}
+
+	float currentMultiplayerWaitTime;
+	float timeToWaitUntilRandomAI;
+
+	void multiPlayerQuickPlayStartGame ()
+	{
+		currentMultiplayerWaitTime = 0;
+		// If we wait for 30-60 seconds with no opponent, we'll play with a random AI
+		timeToWaitUntilRandomAI = 30 + UnityEngine.Random.Range (0, 30);
+		currentMenu = multiPlayerQuickPlayWaitForGame;
+	}
+
+	// TODO: Add server-based multiplayer here
+	void multiPlayerQuickPlayWaitForGame ()
+	{
+		setButtonsText (new string[] { "",
+			"", 
+			"",
+			"<<< BACK TO QUICK PLAY"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			noMenu,
+			multiPlayerQuickPlay
+		});
+
+		currentMultiplayerWaitTime += Time.deltaTime;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Waiting for another player...\n\n" +
+		String.Format ("Time in Queue: {0} seconds", Mathf.Round (currentMultiplayerWaitTime)));
+
+		if (currentMultiplayerWaitTime > timeToWaitUntilRandomAI) {
+			slider.value = 5;
+			currentMenu = proceedToAIGame;
+		} else {
+			currentMenu = multiPlayerQuickPlayWaitForGame;
+		}
+	}
+
+	void proceedToAIGame ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Found an Opponent!\n\n" +
+		"Setting up game...");
+
+		if (slider.value <= 0) {
+			gameLogic.computer.level = UnityEngine.Random.Range (0, 9);
+			gameLogic.computer.updateSpeedAndDifficulty ();
+			gameLogic.gameMode = "Multiplayer Quick Play";
+			Debug.Log (gameLogic.computer.getLevelString ());
+			currentMenu = startGame;
+		} else {
+			currentMenu = proceedToAIGame;
+		}
 	}
 
 	void multiPlayerBattleCode ()
@@ -643,7 +739,7 @@ public class UIManager : MonoBehaviour
 			
 			// Computer is Hard, Moderate Speed for One Man Army
 			computer.level = 7;
-			computer.getLevelString ();
+			gameLogic.computer.updateSpeedAndDifficulty ();
 
 			gameLogic.gameMode = "One Man Army";
 			currentMenu = startGame;
@@ -905,17 +1001,17 @@ public class UIManager : MonoBehaviour
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
 		if (game.currentTriviaRound.playerAttacks (computer)) {
-			setButtonsText (new string[] { "DRAG THE SWORD BLOCK TO CLAIM AN AREA TO ATTACK",
-				"OVERLAP WITH THE STAR BLOCK TO DO MORE DAMAGE",
-				"OVERLAP WITH THE SHIELD WILL DO NO DAMAGE",
-				"PLACE IT WHERE YOUR OPPONENT WON'T DEFEND"
+			setButtonsText (new string[] { "",
+				"",
+				"",
+				""
 			});
 			objectVisibility (true, false, true);
 		} else {
-			setButtonsText (new string[] { "DRAG THE SHIELD BLOCK TO CLAIM AN AREA TO DEFEND",
-				"OVERLAP WITH THE SWORD BLOCK TO NEGATE DAMAGE",
-				"THE STAR BLOCK IS A TEMPTING AREA TO ATTACK",
-				"PLACE IT WHERE YOUR OPPONENT WILL ATTACK"
+			setButtonsText (new string[] { "",
+				"",
+				"",
+				""
 			});
 			objectVisibility (false, true, true);
 		}
@@ -953,11 +1049,21 @@ public class UIManager : MonoBehaviour
 		});
 
 		if (slider.value > 0) {
+
+			// Make the sword and shield uninteractable at this point
+			objects [0].GetComponent<Draggable> ().draggingEnabled = false;
+			objects [1].GetComponent<Draggable> ().draggingEnabled = false;
+
 			currentMenu = combatResults;
 		} else if (game.playerHealth < 1 || game.enemyHealth < 1) {
 			slider.value = game.roundTime / 2;
 			currentMenu = endGame;
 		} else {
+
+			// Restore ability to drag objects around for later rounds
+			objects [0].GetComponent<Draggable> ().draggingEnabled = true;
+			objects [1].GetComponent<Draggable> ().draggingEnabled = true;
+
 			currentMenu = continueGame;
 		}
 	}

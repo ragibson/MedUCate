@@ -94,10 +94,14 @@ public class ComputerPlayer
 		return speeds [speed];
 	}
 
-	public string getLevelString ()
-	{
+	public void updateSpeedAndDifficulty() {
 		difficulty = level / difficulties.Length;
 		speed = level % speeds.Length;
+	}
+
+	public string getLevelString ()
+	{
+		updateSpeedAndDifficulty ();
 		return difficulties [difficulty] + "/" + speeds [speed];
 	}
 
