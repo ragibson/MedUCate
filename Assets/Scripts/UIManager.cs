@@ -17,6 +17,9 @@ public class UIManager : MonoBehaviour
 	 * 
 	 * 	TODO: Add server-based multiplayer
 	 * 
+	 * 	TODO: Add text field for pulling from server using 
+	 * 	question set code in "Add Questions" menu
+	 * 
 	 * 	TODO: LEADERBOARD needs to be connected
 	 * 	to the server once networking  for the
 	 * 	game is more complete.
@@ -207,15 +210,14 @@ public class UIManager : MonoBehaviour
 			"REVIEW QUESTIONS >>>",
 			"<<< BACK TO MENU"
 		});
-		setButtonBehaviors (new Action[] { changeQuestions, noMenu, reviewQuestions, mainMenu });
+		setButtonBehaviors (new Action[] { changeQuestions, addQuestions, reviewQuestions, mainMenu });
 
 		setDisplayImage (images [3]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > PROFILE\n\n" +
 		"CHANGE QUESTIONS -\n" +
-		"CHANGE YOUR CURRENT QUESTION\n" +
-		"SET AND RESETS THE\n" +
-		"CAMPAIGN PROGRESS\n\n" +
+		"CHANGE YOUR CURRENT\n" +
+		"QUESTION SET\n\n" +
 		"ADD QUESTIONS -\n" +
 		"IMPORT YOUR OWN QUESTIONS\n" +
 		"FROM A CODE TO CUSTOMIZE\n" +
@@ -225,6 +227,29 @@ public class UIManager : MonoBehaviour
 		"CURRENT QUESTION SET");
 
 		currentMenu = profile;
+	}
+
+	/*
+	 * 	TODO: Add text field for pulling from server using question set 
+	 * 	code in "Add Questions" menu
+	 */
+	void addQuestions ()
+	{
+		setButtonsText (new string[] {
+			"",
+			"",
+			"",
+			"<<< BACK TO PROFILE"
+		});
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, profile });
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Go to\n" +
+		"www.websitewillgohere.com\n" +
+		"to update and add question sets!");
+
+		currentMenu = addQuestions;
 	}
 
 	void singlePlayerQuickPlay ()
@@ -586,7 +611,8 @@ public class UIManager : MonoBehaviour
 	float currentMultiplayerWaitTime;
 	float timeToWaitUntilRandomAI;
 
-	void multiPlayerQuickPlayStartGame() {
+	void multiPlayerQuickPlayStartGame ()
+	{
 		currentMultiplayerWaitTime = 0;
 		// If we wait for 30-60 seconds with no opponent, we'll play with a random AI
 		timeToWaitUntilRandomAI = 30 + UnityEngine.Random.Range (0, 30);
@@ -594,7 +620,8 @@ public class UIManager : MonoBehaviour
 	}
 
 	// TODO: Add server-based multiplayer here
-	void multiPlayerQuickPlayWaitForGame() {
+	void multiPlayerQuickPlayWaitForGame ()
+	{
 		setButtonsText (new string[] { "",
 			"", 
 			"",
@@ -612,7 +639,7 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("Waiting for another player...\n\n" +
-			String.Format("Time in Queue: {0} seconds", Mathf.Round(currentMultiplayerWaitTime)));
+		String.Format ("Time in Queue: {0} seconds", Mathf.Round (currentMultiplayerWaitTime)));
 
 		if (currentMultiplayerWaitTime > timeToWaitUntilRandomAI) {
 			slider.value = 5;
@@ -621,15 +648,16 @@ public class UIManager : MonoBehaviour
 			currentMenu = multiPlayerQuickPlayWaitForGame;
 		}
 	}
-		
-	void proceedToAIGame() {
+
+	void proceedToAIGame ()
+	{
 		slider.value -= Time.deltaTime;
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("Found an Opponent!\n\n" +
-			"Setting up game...");
+		"Setting up game...");
 
 		if (slider.value <= 0) {
 			gameLogic.computer.level = UnityEngine.Random.Range (0, 9);
@@ -711,7 +739,7 @@ public class UIManager : MonoBehaviour
 			
 			// Computer is Hard, Moderate Speed for One Man Army
 			computer.level = 7;
-			gameLogic.computer.updateSpeedAndDifficulty();
+			gameLogic.computer.updateSpeedAndDifficulty ();
 
 			gameLogic.gameMode = "One Man Army";
 			currentMenu = startGame;

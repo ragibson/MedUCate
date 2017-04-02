@@ -11,7 +11,7 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 ## TODO
   * Networking
     * Manage leaderboard on server
-    * Handle Question Sets on server
+    * Handle Question Sets on server (including IDs for adding/updating them in game)
     * Handle activationCode
     * Handle expiryTime
     * Handle multiplayer
