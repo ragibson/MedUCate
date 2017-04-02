@@ -17,14 +17,12 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
     * Handle multiplayer
     * Handle usernames
     * Verify user information with server on startup
-  * General
-    * Multiplayer timeouts and randomized AIs
   * GameLogicManager.cs
     * Remove hardcoded Question Sets
   * UIManager.cs
     * Implement "ADD QUESTIONS"
     * Implement "VIEW HISTORY"
-    * Implement "HOST GAME"
+    * Implement "HOST GAME" (get game code for other player to join game)
     * Implement "JOIN GAME"
     * (Nonessential) XML parser for menus
 

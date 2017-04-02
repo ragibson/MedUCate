@@ -15,6 +15,8 @@ public class UIManager : MonoBehaviour
 	 * 		HOST GAME
 	 * 		JOIN GAME
 	 * 
+	 * 	TODO: Add server-based multiplayer
+	 * 
 	 * 	TODO: LEADERBOARD needs to be connected
 	 * 	to the server once networking  for the
 	 * 	game is more complete.
@@ -559,7 +561,7 @@ public class UIManager : MonoBehaviour
 			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startGame,
+			multiPlayerQuickPlayStartGame,
 			noMenu,
 			settings.changeMultiPlayerType,
 			multiPlayer
@@ -579,6 +581,65 @@ public class UIManager : MonoBehaviour
 		String.Format ("\n(OPTION {0} OF {1})\n\n", settings.multiplayerMode + 1, settings.multiplayerModes.Length));
 
 		currentMenu = multiPlayerQuickPlay;
+	}
+
+	float currentMultiplayerWaitTime;
+	float timeToWaitUntilRandomAI;
+
+	void multiPlayerQuickPlayStartGame() {
+		currentMultiplayerWaitTime = 0;
+		// If we wait for 30-60 seconds with no opponent, we'll play with a random AI
+		timeToWaitUntilRandomAI = 30 + UnityEngine.Random.Range (0, 30);
+		currentMenu = multiPlayerQuickPlayWaitForGame;
+	}
+
+	// TODO: Add server-based multiplayer here
+	void multiPlayerQuickPlayWaitForGame() {
+		setButtonsText (new string[] { "",
+			"", 
+			"",
+			"<<< BACK TO QUICK PLAY"
+		});
+		setButtonBehaviors (new Action[] {
+			noMenu,
+			noMenu,
+			noMenu,
+			multiPlayerQuickPlay
+		});
+
+		currentMultiplayerWaitTime += Time.deltaTime;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Waiting for another player...\n\n" +
+			String.Format("Time in Queue: {0} seconds", Mathf.Round(currentMultiplayerWaitTime)));
+
+		if (currentMultiplayerWaitTime > timeToWaitUntilRandomAI) {
+			slider.value = 5;
+			currentMenu = proceedToAIGame;
+		} else {
+			currentMenu = multiPlayerQuickPlayWaitForGame;
+		}
+	}
+		
+	void proceedToAIGame() {
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Found an Opponent!\n\n" +
+			"Setting up game...");
+
+		if (slider.value <= 0) {
+			gameLogic.computer.level = UnityEngine.Random.Range (0, 9);
+			gameLogic.computer.updateSpeedAndDifficulty ();
+			gameLogic.gameMode = "Multiplayer Quick Play";
+			Debug.Log (gameLogic.computer.getLevelString ());
+			currentMenu = startGame;
+		} else {
+			currentMenu = proceedToAIGame;
+		}
 	}
 
 	void multiPlayerBattleCode ()
@@ -650,7 +711,7 @@ public class UIManager : MonoBehaviour
 			
 			// Computer is Hard, Moderate Speed for One Man Army
 			computer.level = 7;
-			computer.getLevelString ();
+			gameLogic.computer.updateSpeedAndDifficulty();
 
 			gameLogic.gameMode = "One Man Army";
 			currentMenu = startGame;
