@@ -7,8 +7,6 @@ public class GameLogicManager : MonoBehaviour
 {
 
 	/*
-	 * 	TODO: Remove hardcoded Question Sets
-	 * 
 	 * 	TODO: Handle usernames
 	 */
 
@@ -30,7 +28,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public Settings settings = new Settings ();
 	public ComputerPlayer computer = new ComputerPlayer ();
-	public QuestionSet[] questionSets;
+	public List<QuestionSet> questionSets = new List<QuestionSet> ();
 	int selectedSet = 0;
 
 	// === Profile Change Questions === //
@@ -47,8 +45,20 @@ public class GameLogicManager : MonoBehaviour
 	// Initialization
 	void Start ()
 	{
-		// TODO: Remove hardcoded Question Sets
-		questionSets = prototypeQuestionSets ();
+		// Get default question sets
+		foreach (String s in new String[] { "Default_Mental_Health_Set",
+			"Default_Physical_Health_Set",
+			"Default_Social_Health_Set",	
+			"Default_Nutritional_Health_Set" }) {
+			addQuestionSet (retrieveSetFromServer (s));
+		}
+
+		if (questionSets.Count == 0) {
+			addQuestionSet (new QuestionSet (
+				new Question[]{ new Question ("You have no Question Sets", "", "", "", "") },
+				"No Question Sets",
+				"N/A"));
+		}
 
 		getPlayerPrefs ();
 
@@ -57,6 +67,25 @@ public class GameLogicManager : MonoBehaviour
 			UI.currentMenu = UI.debugWipeAllSettings;
 		}
 
+	}
+
+	public bool addQuestionSet (QuestionSet setToAdd)
+	{
+		if (setToAdd.numberOfQuestions () == 0) {
+			return false;
+		}
+
+		for (int i = 0; i < questionSets.Count; i++) {
+
+			// If this matches a set name we have, update the old set
+			if (String.Equals (questionSets [i].setName, setToAdd.setName)) {
+				questionSets [i] = setToAdd;
+				return true;
+			}
+		}
+
+		questionSets.Add (setToAdd);
+		return true;
 	}
 
 	public string getCampaignScore (int level)
@@ -110,6 +139,10 @@ public class GameLogicManager : MonoBehaviour
 			campaignScores [i] = PlayerPrefs.GetInt (String.Format ("Campaign{0}", i));
 		}
 		selectedSet = PlayerPrefs.GetInt ("Selected Question Set");
+
+		if (selectedSet > questionSets.Count) {
+			selectedSet = 0;
+		}
 
 		setCurrentSet (selectedSet);
 	}
@@ -181,6 +214,86 @@ public class GameLogicManager : MonoBehaviour
 		return displayText;
 	}
 
+	public QuestionSet retrieveSetFromServer (String setName)
+	{
+		string setURL = String.Format ("http://meducate.cs.unc.edu/sets/{0}.csv", setName);
+		WWW setWWW = new WWW (setURL);
+
+		List<Question> questionsToAdd = new List<Question> ();
+
+		// TODO: get QuestionSet author from server
+		string author = "MedUCate LLC";
+
+		while (!setWWW.isDone) {
+			continue;
+		}
+
+		String fileData = setWWW.text;
+		String[] lines = fileData.Split ('\n');
+		for (int i = 0; i < lines.Length; i++) {
+			String[] lineData = SplitCSVLine (lines [i].Trim ());
+
+			if (!lineIsNotQuestion (lineData)) {
+				questionsToAdd.Add (new Question (lineData [0], lineData [1], lineData [2], lineData [3], lineData [4]));
+			}
+		}
+
+		setName = setName.Replace ("_", " ");
+
+		return new QuestionSet (questionsToAdd.ToArray (), setName, author);
+	}
+
+	/*
+	 * 	params:
+	 * 		lineData:	a String[] holding a line of the CSV to parse
+	 * 
+	 * 	returns true if the line contains only a question number
+	 * 
+	 * 	returns false if the line contains question text and answers
+	 */
+	bool lineIsNotQuestion (String[] lineData)
+	{
+		if (lineData.Length == 1) {
+			return true;
+		}
+
+		if (!lineData [0].Contains ("Question ")) {
+			return false;
+		}
+
+		for (int i = 1; i < lineData.Length; i++) {
+			if (!String.Equals (lineData [i], "")) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	String[] SplitCSVLine (String s)
+	{
+		int i;
+		int a = 0;
+		int count = 0;
+		List<string> str = new List<string> ();
+		for (i = 0; i < s.Length; i++) {
+			switch (s [i]) {
+			case ',':
+				if ((count & 1) == 0) {
+					str.Add (s.Substring (a, i - a));
+					a = i + 1;
+				}
+				break;
+			case '"':
+				count++;
+				break;
+			}
+		}
+		str.Add (s.Substring (a));
+		return str.ToArray ();
+	}
+
+
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
 	// === MANIPULATION FROM THE VARIOUS GAME MENUS  === //
 
@@ -196,7 +309,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void increaseCurrentSet ()
 	{
-		setCurrentSet ((selectedSet + 1) % questionSets.Length);
+		setCurrentSet ((selectedSet + 1) % questionSets.Count);
 	}
 
 	public void decreaseCurrentSet ()
@@ -208,12 +321,13 @@ public class GameLogicManager : MonoBehaviour
 		 * 	This is just since modulo of negative numbers
 		 * 	does not behave as needed.
 		 */
-		setCurrentSet ((selectedSet + questionSets.Length - 1) % questionSets.Length);
+		setCurrentSet ((selectedSet + questionSets.Count - 1) % questionSets.Count);
 	}
 
 	public void selectQuestionSet ()
 	{
 		setCurrentSet (setToChange);
+		currentQuestion = 0;
 	}
 
 	public QuestionSet getSetToChange ()
@@ -224,7 +338,7 @@ public class GameLogicManager : MonoBehaviour
 	public void increaseSetToChange ()
 	{
 		setToChange += 1;
-		setToChange %= questionSets.Length;
+		setToChange %= questionSets.Count;
 	}
 
 	public void decreaseSetToChange ()
@@ -236,8 +350,8 @@ public class GameLogicManager : MonoBehaviour
 		 * 	This is just since modulo of negative numbers
 		 * 	does not behave as needed.
 		 */
-		setToChange += questionSets.Length - 1;
-		setToChange %= questionSets.Length;
+		setToChange += questionSets.Count - 1;
+		setToChange %= questionSets.Count;
 	}
 
 	public void hideAnswer ()
@@ -287,38 +401,4 @@ public class GameLogicManager : MonoBehaviour
 		objects [2].transform.position = randomPlacement;
 	}
 
-	// ===== HARD CODED QUESTION SETS FROM PROTOTYPE ===== //
-	// =====      TODO: REPLACE WITH XML FILES       ===== //
-
-	QuestionSet[] prototypeQuestionSets ()
-	{
-		QuestionSet[] hardcoded = new QuestionSet[4];
-
-		hardcoded [0] = new QuestionSet (new Question[] {
-			new Question ("1 + 1?", "2", "1", "12", "2017"),
-			new Question ("2 + 2?", "4", "1", "12", "2017"),
-			new Question ("3 + 3?", "6", "1", "12", "2017"),
-			new Question ("4 + 4?", "8", "1", "12", "2017")
-		}, "Default Mental Health Set", "MedUCate LLC", "0000001");
-		hardcoded [1] = new QuestionSet (new Question[] {
-			new Question ("10 + 10?", "20", "1", "12", "2017"),
-			new Question ("20 + 20?", "40", "1", "12", "2017"),
-			new Question ("30 + 30?", "60", "1", "12", "2017"),
-			new Question ("40 + 40?", "80", "1", "12", "2017")
-		}, "Default Physical Health Set", "MedUCate LLC", "0000002");
-		hardcoded [2] = new QuestionSet (new Question[] {
-			new Question ("100 + 100?", "200", "1", "12", "2017"),
-			new Question ("200 + 200?", "400", "1", "12", "2017"),
-			new Question ("300 + 300?", "600", "1", "12", "2017"),
-			new Question ("400 + 400?", "800", "1", "12", "2017")
-		}, "Default Social Health Set", "MedUCate LLC", "0000003");
-		hardcoded [3] = new QuestionSet (new Question[] {
-			new Question ("1000 + 1000?", "2000", "1", "12", "2017"),
-			new Question ("2000 + 2000?", "4000", "1", "12", "2017"),
-			new Question ("3000 + 3000?", "6000", "1", "12", "2017"),
-			new Question ("4000 + 4000?", "8000", "1", "12", "2017")
-		}, "Default Nutritional Health Set", "MedUCate LLC", "0000004");
-
-		return hardcoded;
-	}
 }
