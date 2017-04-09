@@ -188,8 +188,7 @@ public class UIManager : MonoBehaviour
 		setDisplayText ("MAIN MENU > MULTIPLAYER\n\n" +
 		"QUICK PLAY -\n" +
 		"PLAY QUESTIONS AGAINST A\n" +
-		"RANDOM HUMAN OPPONENT WITH\n" +
-		"NO STAKES\n\n" +
+		"RANDOM HUMAN OPPONENT\n\n" +
 		"BATTLE CODE -\n" +
 		"CREATE AND SHARE CODES TO\n" +
 		"SELECT QUESTIONS AND WHO YOU\n" +
@@ -702,7 +701,7 @@ public class UIManager : MonoBehaviour
 	{
 		string startGameText = "<<< START GAME >>>";
 		if (gameLogic.reputation < settings.getWager ()) {
-			startGameText = "<<< NOT ENOUGH REPUTATION TO WAGER >>>";
+			startGameText = "NOT ENOUGH REPUTATION TO WAGER";
 		}
 
 		setButtonsText (new string[] { startGameText,
@@ -746,7 +745,7 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
-	string leaderboardURL = "http://www.unc.edu/~ragibson/leaderboardtest.txt";
+	string leaderboardURL = "http://meducate.cs.unc.edu/leaderboard.txt";
 	WWW leaderboardWWW;
 
 	void leaderboardLoad ()
@@ -776,10 +775,6 @@ public class UIManager : MonoBehaviour
 			if (string.Equals (leaderboardWWW.text, "")) {
 				setDisplayText ("Error with internet connection");
 			} else if (leaderboardWWW.text.Contains ("was not found on this server.")) {
-				/*
-				 * This error message is just for the test file and will probably
-				 * not work with the final server setup
-				 */
 				setDisplayText ("Could not find leaderboard");
 			} else {
 				setDisplayText (leaderboardWWW.text);
@@ -814,9 +809,7 @@ public class UIManager : MonoBehaviour
 		String.Format ("NAME - {0}\n", gameLogic.getSetToChange ().setName) +
 		String.Format ("AUTHORS - {0}\n", gameLogic.getSetToChange ().authorName) +
 		String.Format ("NUMBER OF QUESTIONS - {0}\n", gameLogic.getSetToChange ().numberOfQuestions ()) +
-		String.Format ("ACTIVATION CODE - {0}\n", gameLogic.getSetToChange ().activationCode) +
-		String.Format ("EXPIRES - {0}\n\n", gameLogic.getSetToChange ().expiryTime) +
-		String.Format ("(SET {0} OF {1})", gameLogic.setToChange + 1, gameLogic.questionSets.Length));
+		String.Format ("(SET {0} OF {1})", gameLogic.setToChange + 1, gameLogic.questionSets.Count));
 
 		currentMenu = changeQuestions;
 	}
@@ -848,7 +841,8 @@ public class UIManager : MonoBehaviour
 			text += "CORRECT ANSWER -\n" +
 			gameLogic.getCurrentQuestion ().correctAnswer;
 		}
-		text += String.Format ("\n\n(QUESTION {0} OF {1})", gameLogic.currentQuestion + 1, gameLogic.questionSets.Length);
+		text += String.Format ("\n\n(QUESTION {0} OF {1})", gameLogic.currentQuestion + 1,
+			gameLogic.getSetToChange ().numberOfQuestions ());
 
 		setDisplayText (text);
 
