@@ -27,3 +27,9 @@ We have question set CSVs placed in apache2's "DocumentRoot/sets" directory, whi
             AllowOverride None
             Require all granted
     </Directory>
+
+The game currently looks for the following default question sets:
+  * Default_Mental_Health_Set.csv
+  * Default_Physical_Health_Set.csv
+  * Default_Social_Health_Set.csv
+  * Default_Nutritional_Health_Set.csv
