@@ -10,23 +10,15 @@ public class UIManager : MonoBehaviour
 	 * 	TODO: The following menu items were not
 	 * 	implemented in the original prototype
 	 * 	and have not been implemented here:
-	 * 		ADD QUESTIONS
 	 * 		VIEW HISTORY
 	 * 		HOST GAME
 	 * 		JOIN GAME
 	 * 
 	 * 	TODO: Add server-based multiplayer
 	 * 
-	 * 	TODO: Add text field for pulling from server using 
-	 * 	question set code in "Add Questions" menu
-	 * 
 	 * 	TODO: LEADERBOARD needs to be connected
 	 * 	to the server once networking  for the
 	 * 	game is more complete.
-	 * 
-	 * 	TODO: Possibly store the menus in an
-	 * 	XML file so they don't take up so much
-	 * 	space here.
 	 */
 
 	private Settings settings;
@@ -56,7 +48,7 @@ public class UIManager : MonoBehaviour
 		computer = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ().computer;
 		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
 		slider = GameObject.Find ("Timer Slider").GetComponent<Slider> ();
-		mainMenu ();
+		currentMenu = connectingToServer;
 	}
 	
 	// Update is called once per frame
@@ -204,8 +196,8 @@ public class UIManager : MonoBehaviour
 	void profile ()
 	{
 		setButtonsText (new string[] {
-			"CHANGE QUESTIONS >>>",
-			"ADD QUESTIONS >>>",
+			"SELECT QUESTION SETS >>>",
+			"ADD/REMOVE QUESTION SETS>>>",
 			"REVIEW QUESTIONS >>>",
 			"<<< BACK TO MENU"
 		});
@@ -225,31 +217,53 @@ public class UIManager : MonoBehaviour
 		"SHOW ALL THE QUESTIONS FOR THE\n" +
 		"CURRENT QUESTION SET");
 
+		// Make sure the input field for adding questions not being shown
+		gameLogic.inputfield.SetActive(false);
+
 		currentMenu = profile;
 	}
 
-	/*
-	 * 	TODO: Add text field for pulling from server using question set 
-	 * 	code in "Add Questions" menu
-	 */
 	void addQuestions ()
 	{
 		setButtonsText (new string[] {
-			"",
-			"",
+			"Add Set To Device",
+			"Remove Set From Device",
 			"",
 			"<<< BACK TO PROFILE"
 		});
-		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, profile });
+		setButtonBehaviors (new Action[] { addThisSet, removeThisSet, noMenu, profile });
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("Go to\n" +
-		"www.websitewillgohere.com\n" +
-		"to update and add question sets!");
+		"www.meducate.cs.unc.edu\n" +
+		"to update and add question sets!\n\n" +
+		"Then, come back and type the name\n" +
+		"of the Question Set here!");
+
+		gameLogic.inputfield.SetActive(true);
 
 		currentMenu = addQuestions;
 	}
+
+	void addThisSet() {
+		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text.Replace(' ','_');
+		gameLogic.setsToAdd.Enqueue (setName);
+		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Requested Set From Server!";
+		currentMenu = addQuestions;
+	}
+
+	void removeThisSet() {
+		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text;
+		for (int i = 0; i < gameLogic.questionSets.Count; i++) {
+			if (String.Equals (gameLogic.questionSets [i].setName.ToLower(), setName.ToLower())) {
+				gameLogic.questionSets.RemoveAt (i);
+			}
+		}
+		gameLogic.setCurrentSet (0);
+		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Removed Set From Device!";
+		currentMenu = addQuestions;
+	}	
 
 	void singlePlayerQuickPlay ()
 	{
@@ -847,6 +861,21 @@ public class UIManager : MonoBehaviour
 		setDisplayText (text);
 
 		currentMenu = reviewQuestions;
+	}
+
+	void connectingToServer ()
+	{
+		if (gameLogic.setsToAdd.Count != 0) {
+			setButtonsText (new string[] { "", "", "", "" });
+			setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
+			setDisplayImage (images [5]);
+			setDisplayColor (Color.blue);
+			setDisplayText ("Connecting to meducate.cs.unc.edu...\n\n" +
+			String.Format ("Retrieving {0}", gameLogic.setsToAdd.Peek ()));
+			currentMenu = connectingToServer;
+		} else {
+			currentMenu = mainMenu;
+		}
 	}
 
 	void noMenu ()
