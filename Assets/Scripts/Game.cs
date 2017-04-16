@@ -10,6 +10,8 @@ public class Game
 	public float playerHealth;
 	public float enemyHealth;
 
+	public Queue<Question> questionsToAsk = new Queue<Question>();
+
 	public Game (float HP, float secondsPerRound, float defaultDamage)
 	{
 		startingHealth = HP;
@@ -29,10 +31,31 @@ public class Game
 
 	private int round = 1;
 
+	public void fillQuestionQueue(QuestionSet currentSet) {
+		List<int> questionIds = new List<int> ();
+		for (int i = 0; i < currentSet.numberOfQuestions(); i++) {
+			questionIds.Add (i);
+		}
+
+		for (int i = 0; i < questionIds.Count; i++) {
+			int temp = questionIds[i];
+			int randomIndex = Random.Range(i, questionIds.Count);
+			questionIds[i] = questionIds[randomIndex];
+			questionIds[randomIndex] = temp;
+		}
+
+		foreach (int i in questionIds) {
+			questionsToAsk.Enqueue (currentSet.questions [i]);
+		}
+	}
+
 	public void nextRound ()
 	{
 		QuestionSet currentSet = gameLogic.settings.selected;
-		Question currentQuestion = currentSet.questions [Random.Range (0, currentSet.numberOfQuestions () - 1)];
+		if (questionsToAsk.Count == 0) {
+			fillQuestionQueue (currentSet);
+		}
+		Question currentQuestion = questionsToAsk.Dequeue ();
 		answers = currentQuestion.shuffledAnswers ();
 
 		gameLogic.computer.updateTimeAndAnswer ();

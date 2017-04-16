@@ -47,7 +47,7 @@ public class GameLogicManager : MonoBehaviour
 	public string gameMode = "";
 	public int[] campaignScores;
 
-	public Queue<String> setsToAdd = new Queue<String>();
+	public Queue<String> setsToAdd = new Queue<String> ();
 
 	// Initialization
 	void Start ()
@@ -56,7 +56,8 @@ public class GameLogicManager : MonoBehaviour
 		foreach (String s in new String[] { "Default_Mental_Health_Set",
 			"Default_Physical_Health_Set",
 			"Default_Social_Health_Set",	
-			"Default_Nutritional_Health_Set" }) {
+			"Default_Nutritional_Health_Set"
+		}) {
 			setsToAdd.Enqueue (s);
 		}
 
@@ -68,7 +69,8 @@ public class GameLogicManager : MonoBehaviour
 	}
 
 	// Handles the retrieval of question sets with timeout
-	void Update() {
+	void Update ()
+	{
 		if (serverTimeout > 0 && setWWW != null) {
 			serverTimeout -= Time.deltaTime;
 
