@@ -69,6 +69,7 @@ public class ComputerPlayer
 	{
 		level += 1;
 		level %= difficulties.Length * speeds.Length;
+		updateSpeedAndDifficulty ();
 	}
 
 	public void decreaseLevel ()

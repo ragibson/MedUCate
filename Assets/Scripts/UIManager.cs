@@ -218,7 +218,7 @@ public class UIManager : MonoBehaviour
 		"CURRENT QUESTION SET");
 
 		// Make sure the input field for adding questions not being shown
-		gameLogic.inputfield.SetActive(false);
+		gameLogic.inputfield.SetActive (false);
 
 		currentMenu = profile;
 	}
@@ -241,29 +241,31 @@ public class UIManager : MonoBehaviour
 		"Then, come back and type the name\n" +
 		"of the Question Set here!");
 
-		gameLogic.inputfield.SetActive(true);
+		gameLogic.inputfield.SetActive (true);
 
 		currentMenu = addQuestions;
 	}
 
-	void addThisSet() {
-		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text.Replace(' ','_');
+	void addThisSet ()
+	{
+		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text.Replace (' ', '_');
 		gameLogic.setsToAdd.Enqueue (setName);
 		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Requested Set From Server!";
 		currentMenu = addQuestions;
 	}
 
-	void removeThisSet() {
+	void removeThisSet ()
+	{
 		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text;
 		for (int i = 0; i < gameLogic.questionSets.Count; i++) {
-			if (String.Equals (gameLogic.questionSets [i].setName.ToLower(), setName.ToLower())) {
+			if (String.Equals (gameLogic.questionSets [i].setName.ToLower (), setName.ToLower ())) {
 				gameLogic.questionSets.RemoveAt (i);
 			}
 		}
 		gameLogic.setCurrentSet (0);
 		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Removed Set From Device!";
 		currentMenu = addQuestions;
-	}	
+	}
 
 	void singlePlayerQuickPlay ()
 	{
@@ -557,13 +559,20 @@ public class UIManager : MonoBehaviour
 	void singlePlayerCampaign ()
 	{
 
-		setButtonsText (new string[] { "<<< START GAME >>>",
+		string startGameText = "<<< START GAME >>>";
+		Action startGameAction = startCampaign;
+		if (computer.level > 0 && gameLogic.campaignScores [computer.level - 1] == 0) {
+			startGameText = "NOT UNLOCKED";
+			startGameAction = noMenu;
+		}
+
+		setButtonsText (new string[] { startGameText,
 			"CHANGE LEVEL >>>", 
 			"<<< CHANGE LEVEL",
 			"<<< BACK TO SINGLEPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			startCampaign,
+			startGameAction,
 			computer.increaseLevel,
 			computer.decreaseLevel,
 			singlePlayer
@@ -872,7 +881,11 @@ public class UIManager : MonoBehaviour
 			setDisplayColor (Color.blue);
 			setDisplayText ("Connecting to meducate.cs.unc.edu...\n\n" +
 			String.Format ("Retrieving {0}", gameLogic.setsToAdd.Peek ()));
-			currentMenu = connectingToServer;
+			if (gameLogic.completedTutorial) {
+				currentMenu = connectingToServer;
+			} else {
+				currentMenu = tutorialStart;
+			}
 		} else {
 			currentMenu = mainMenu;
 		}
