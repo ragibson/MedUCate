@@ -9,6 +9,8 @@
 
 The [Excel document](TemplateSheet.xlsm) in this directory will output a CSV files to "C:\CSVToAdd" for use on the server.
 
+CSVs should be stored in lowercase with spaces replaced with underscores on the server. I.e. "Default Set Name" becomes default_set_name.csv
+
 <a name = "Server"></a>
 ## Setting Up Server
  

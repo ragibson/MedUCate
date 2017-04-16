@@ -15,7 +15,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
     * Handle multiplayer
     * Handle usernames
   * UIManager.cs
-    * Implement "ADD QUESTIONS"
     * Implement "VIEW HISTORY"
     * Implement "HOST GAME" (get game code for other player to join game)
     * Implement "JOIN GAME"

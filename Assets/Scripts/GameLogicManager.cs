@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameLogicManager : MonoBehaviour
 {
@@ -30,6 +31,9 @@ public class GameLogicManager : MonoBehaviour
 	public ComputerPlayer computer = new ComputerPlayer ();
 	public List<QuestionSet> questionSets = new List<QuestionSet> ();
 	int selectedSet = 0;
+
+	// The input field for the "Add Questions" menu
+	public GameObject inputfield;
 
 	float serverTimeout = 2;
 	WWW setWWW = null;
@@ -73,7 +77,7 @@ public class GameLogicManager : MonoBehaviour
 	// Handles the retrieval of question sets with timeout
 	void Update ()
 	{
-		if (serverTimeout > 0 && setWWW != null) {
+		if (serverTimeout > 0 && setWWW != null && setsToAdd.Count > 0) {
 			serverTimeout -= Time.deltaTime;
 
 			if (!String.IsNullOrEmpty (setWWW.error)) {
@@ -96,7 +100,7 @@ public class GameLogicManager : MonoBehaviour
 					}
 				}
 
-				String setName = setNameToRetrieve.Replace ("_", " ");
+				String setName = setNameToRetrieve.Replace ("_", " ").ToLower();
 
 				addQuestionSet (new QuestionSet (questionsToAdd.ToArray (), setName, author));
 
@@ -118,6 +122,7 @@ public class GameLogicManager : MonoBehaviour
 
 				if (!initialSetupComplete) {
 					updatePlayerPrefs ();
+					getPlayerPrefs ();
 					initialSetupComplete = true;
 				}
 			}
@@ -128,6 +133,12 @@ public class GameLogicManager : MonoBehaviour
 	{
 		if (setToAdd.numberOfQuestions () == 0) {
 			return false;
+		}
+
+		for (int i = 0; i < questionSets.Count; i++) {
+			if (String.Equals (questionSets [i].setName.ToLower(), "No Question Sets".ToLower())) {
+				questionSets.RemoveAt (i);
+			}
 		}
 
 		for (int i = 0; i < questionSets.Count; i++) {
@@ -213,6 +224,8 @@ public class GameLogicManager : MonoBehaviour
 		reputation = 0;
 		completedTutorial = false;
 		selectedSet = 0;
+
+		questionSets = new List<QuestionSet> ();
 
 		updatePlayerPrefs ();
 		getPlayerPrefs ();
@@ -357,7 +370,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void retrieveSetFromServer (String s)
 	{
-		setNameToRetrieve = s;
+		setNameToRetrieve = s.ToLower();
 		string setURL = String.Format ("http://meducate.cs.unc.edu/sets/{0}.csv", setNameToRetrieve);
 		setWWW = new WWW (setURL);
 		serverTimeout = 2;
@@ -419,11 +432,22 @@ public class GameLogicManager : MonoBehaviour
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
 	// === MANIPULATION FROM THE VARIOUS GAME MENUS  === //
 
-	void setCurrentSet (int i)
+	public void setCurrentSet (int i)
 	{
+		if (questionSets.Count == 0) {
+			if (questionSets.Count == 0) {
+				addQuestionSet (new QuestionSet (
+					new Question[]{ new Question ("You have no Question Sets", "", "", "", "") },
+					"No Question Sets",
+					"N/A"));
+			}
+		}
+
 		if (i > questionSets.Count) {
 			i = 0;
 		}
+
+		setToChange = i;
 
 		questionSets [selectedSet].selected = false;
 		selectedSet = i;
