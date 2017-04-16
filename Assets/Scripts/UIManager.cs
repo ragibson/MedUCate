@@ -56,7 +56,7 @@ public class UIManager : MonoBehaviour
 		computer = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ().computer;
 		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
 		slider = GameObject.Find ("Timer Slider").GetComponent<Slider> ();
-		mainMenu ();
+		currentMenu = connectingToServer;
 	}
 	
 	// Update is called once per frame
@@ -847,6 +847,21 @@ public class UIManager : MonoBehaviour
 		setDisplayText (text);
 
 		currentMenu = reviewQuestions;
+	}
+
+	void connectingToServer ()
+	{
+		if (gameLogic.setsToAdd.Count != 0) {
+			setButtonsText (new string[] { "", "", "", "" });
+			setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
+			setDisplayImage (images [5]);
+			setDisplayColor (Color.blue);
+			setDisplayText ("Connecting to meducate.cs.unc.edu...\n\n" +
+			String.Format ("Retrieving {0}", gameLogic.setsToAdd.Peek ()));
+			currentMenu = connectingToServer;
+		} else {
+			currentMenu = mainMenu;
+		}
 	}
 
 	void noMenu ()

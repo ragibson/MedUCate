@@ -31,6 +31,11 @@ public class GameLogicManager : MonoBehaviour
 	public List<QuestionSet> questionSets = new List<QuestionSet> ();
 	int selectedSet = 0;
 
+	float serverTimeout = 2;
+	WWW setWWW = null;
+	String setNameToRetrieve = "";
+	bool initialSetupComplete = false;
+
 	// === Profile Change Questions === //
 	public int setToChange = 0;
 
@@ -42,6 +47,8 @@ public class GameLogicManager : MonoBehaviour
 	public string gameMode = "";
 	public int[] campaignScores;
 
+	public Queue<String> setsToAdd = new Queue<String>();
+
 	// Initialization
 	void Start ()
 	{
@@ -50,23 +57,67 @@ public class GameLogicManager : MonoBehaviour
 			"Default_Physical_Health_Set",
 			"Default_Social_Health_Set",	
 			"Default_Nutritional_Health_Set" }) {
-			addQuestionSet (retrieveSetFromServer (s));
+			setsToAdd.Enqueue (s);
 		}
-
-		if (questionSets.Count == 0) {
-			addQuestionSet (new QuestionSet (
-				new Question[]{ new Question ("You have no Question Sets", "", "", "", "") },
-				"No Question Sets",
-				"N/A"));
-		}
-
-		getPlayerPrefs ();
 
 		if (debugDeleteAllSettings) {
 			UIManager UI = GameObject.Find ("UI").GetComponent<UIManager> ();
 			UI.currentMenu = UI.debugWipeAllSettings;
 		}
 
+	}
+
+	// Handles the retrieval of question sets with timeout
+	void Update() {
+		if (serverTimeout > 0 && setWWW != null) {
+			serverTimeout -= Time.deltaTime;
+
+			if (!String.IsNullOrEmpty (setWWW.error)) {
+				serverTimeout = 0;
+			}
+
+			if (setWWW.isDone) {
+				List<Question> questionsToAdd = new List<Question> ();
+
+				// TODO: get QuestionSet author from server
+				string author = "MedUCate LLC";
+
+				String fileData = setWWW.text;
+				String[] lines = fileData.Split ('\n');
+				for (int i = 0; i < lines.Length; i++) {
+					String[] lineData = SplitCSVLine (lines [i].Trim ());
+
+					if (!lineIsNotQuestion (lineData)) {
+						questionsToAdd.Add (new Question (lineData [0], lineData [1], lineData [2], lineData [3], lineData [4]));
+					}
+				}
+
+				String setName = setNameToRetrieve.Replace ("_", " ");
+
+				addQuestionSet (new QuestionSet (questionsToAdd.ToArray (), setName, author));
+
+				setWWW = null;
+				serverTimeout = 0;
+				setsToAdd.Dequeue ();
+			}
+		} else {
+			// Check if we need to add any more sets
+			if (setsToAdd.Count != 0) {
+				retrieveSetFromServer (setsToAdd.Peek ());
+			} else {
+				if (questionSets.Count == 0) {
+					addQuestionSet (new QuestionSet (
+						new Question[]{ new Question ("You have no Question Sets", "", "", "", "") },
+						"No Question Sets",
+						"N/A"));
+				}
+
+				if (!initialSetupComplete) {
+					getPlayerPrefs ();
+					initialSetupComplete = true;
+				}
+			}
+		}
 	}
 
 	public bool addQuestionSet (QuestionSet setToAdd)
@@ -214,33 +265,14 @@ public class GameLogicManager : MonoBehaviour
 		return displayText;
 	}
 
-	public QuestionSet retrieveSetFromServer (String setName)
+	public void retrieveSetFromServer (String s)
 	{
-		string setURL = String.Format ("http://meducate.cs.unc.edu/sets/{0}.csv", setName);
-		WWW setWWW = new WWW (setURL);
+		setNameToRetrieve = s;
+		string setURL = String.Format ("http://meducate.cs.unc.edu/sets/{0}.csv", setNameToRetrieve);
+		setWWW = new WWW (setURL);
+		serverTimeout = 2;
 
-		List<Question> questionsToAdd = new List<Question> ();
-
-		// TODO: get QuestionSet author from server
-		string author = "MedUCate LLC";
-
-		while (!setWWW.isDone) {
-			continue;
-		}
-
-		String fileData = setWWW.text;
-		String[] lines = fileData.Split ('\n');
-		for (int i = 0; i < lines.Length; i++) {
-			String[] lineData = SplitCSVLine (lines [i].Trim ());
-
-			if (!lineIsNotQuestion (lineData)) {
-				questionsToAdd.Add (new Question (lineData [0], lineData [1], lineData [2], lineData [3], lineData [4]));
-			}
-		}
-
-		setName = setName.Replace ("_", " ");
-
-		return new QuestionSet (questionsToAdd.ToArray (), setName, author);
+		// Update will handle the rest of the retrieval
 	}
 
 	/*
