@@ -61,6 +61,8 @@ public class GameLogicManager : MonoBehaviour
 			setsToAdd.Enqueue (s);
 		}
 
+		getPlayerPrefs ();
+
 		if (debugDeleteAllSettings) {
 			UIManager UI = GameObject.Find ("UI").GetComponent<UIManager> ();
 			UI.currentMenu = UI.debugWipeAllSettings;
@@ -115,7 +117,7 @@ public class GameLogicManager : MonoBehaviour
 				}
 
 				if (!initialSetupComplete) {
-					getPlayerPrefs ();
+					updatePlayerPrefs ();
 					initialSetupComplete = true;
 				}
 			}
@@ -177,6 +179,7 @@ public class GameLogicManager : MonoBehaviour
 			PlayerPrefs.SetInt (String.Format ("Campaign{0}", i), campaignScores [i]);
 		}
 		PlayerPrefs.SetInt ("Selected Question Set", selectedSet);
+		saveAllQuestionSetsToDevice ();
 		PlayerPrefs.Save ();
 	}
 
@@ -193,9 +196,11 @@ public class GameLogicManager : MonoBehaviour
 		}
 		selectedSet = PlayerPrefs.GetInt ("Selected Question Set");
 
-		if (selectedSet > questionSets.Count) {
+		if (selectedSet >= questionSets.Count) {
 			selectedSet = 0;
 		}
+
+		getQuestionSetsFromDevice ();
 
 		setCurrentSet (selectedSet);
 	}
@@ -211,6 +216,89 @@ public class GameLogicManager : MonoBehaviour
 
 		updatePlayerPrefs ();
 		getPlayerPrefs ();
+	}
+
+	/*
+	 * 	Gets all of the question sets from the device using PlayerPrefs
+	 * 
+	 * 	These are to be used in case the server does not respond so the
+	 * 	player can still use offline game modes when not connected to
+	 * 	the internet.
+	 */
+	public void getQuestionSetsFromDevice ()
+	{
+		String[] setNames = PlayerPrefs.GetString ("Question Set Names").Split ('_');
+		foreach (String s in setNames) {
+			if (!String.Equals (s, "")) {
+				
+				int numQuestions = PlayerPrefs.GetInt (s + "_numQuestions");
+
+				List<Question> questions = new List<Question> ();
+
+				for (int i = 0; i < numQuestions; i++) {
+					// prefix = setName_questionID_
+					String prefix = s + "_" + i + "_";
+
+					questions.Add (new Question (
+						PlayerPrefs.GetString (prefix + "q"),
+						PlayerPrefs.GetString (prefix + "a1"),
+						PlayerPrefs.GetString (prefix + "a2"),
+						PlayerPrefs.GetString (prefix + "a3"),
+						PlayerPrefs.GetString (prefix + "a4")
+					));
+				}
+
+				// TODO: get QuestionSet author from server
+				string author = "MedUCate LLC";
+
+				addQuestionSet (new QuestionSet (questions.ToArray (), s, author));
+			}
+		}
+	}
+
+	// Saves all of our question sets to the device using PlayerPrefs
+	public void saveAllQuestionSetsToDevice ()
+	{
+		String setNames = "";
+		foreach (QuestionSet q in questionSets) {
+			saveQuestionSetToDevice (q);
+			setNames += q.setName + "_";
+		}
+		PlayerPrefs.SetString ("Question Set Names", setNames);
+	}
+
+	// Saves a question set to the device using PlayerPrefs
+	public void saveQuestionSetToDevice (QuestionSet setToSave)
+	{
+		PlayerPrefs.SetInt (setToSave.setName + "_numQuestions", setToSave.numberOfQuestions ());
+
+		for (int i = 0; i < setToSave.numberOfQuestions (); i++) {
+			Question questionToSave = setToSave.questions [i];
+			saveQuestionToDevice (setToSave.setName,
+				i,
+				questionToSave.questionText,
+				questionToSave.correctAnswer,
+				questionToSave.incorrectAnswers [0],
+				questionToSave.incorrectAnswers [1],
+				questionToSave.incorrectAnswers [2]);
+		}
+	}
+
+	// Saves one question to the device using PlayerPrefs
+	public void saveQuestionToDevice (String setName, int questionId, string q, string a1, string a2, string a3, string a4)
+	{
+		/*
+		 *	We can use underscores as delimiters here since we replace them with spaces
+		 *	when retrieving the question sets from the server.
+		 *
+		 *	Unity does not support saving of objects to the device, so we must save the fields
+		 *	of the objects and rebuild them manually.
+		 */
+		PlayerPrefs.SetString (setName + "_" + questionId + "_" + "q", q);
+		PlayerPrefs.SetString (setName + "_" + questionId + "_" + "a1", a1);
+		PlayerPrefs.SetString (setName + "_" + questionId + "_" + "a2", a2);
+		PlayerPrefs.SetString (setName + "_" + questionId + "_" + "a3", a3);
+		PlayerPrefs.SetString (setName + "_" + questionId + "_" + "a4", a4);
 	}
 
 	/*
@@ -333,6 +421,10 @@ public class GameLogicManager : MonoBehaviour
 
 	void setCurrentSet (int i)
 	{
+		if (i > questionSets.Count) {
+			i = 0;
+		}
+
 		questionSets [selectedSet].selected = false;
 		selectedSet = i;
 		settings.selected = questionSets [selectedSet];

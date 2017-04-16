@@ -14,9 +14,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
     * Handle Question Set IDs for adding to game
     * Handle multiplayer
     * Handle usernames
-    * Verify user information with server on startup
-  * Game.cs
-    * Store answered question IDs and prevent repeats
   * UIManager.cs
     * Implement "ADD QUESTIONS"
     * Implement "VIEW HISTORY"
