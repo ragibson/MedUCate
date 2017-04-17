@@ -197,7 +197,7 @@ public class UIManager : MonoBehaviour
 	{
 		setButtonsText (new string[] {
 			"SELECT QUESTION SETS >>>",
-			"ADD/REMOVE QUESTION SETS>>>",
+			"ADD/REMOVE SETS, USERNAME >>>",
 			"REVIEW QUESTIONS >>>",
 			"<<< BACK TO MENU"
 		});
@@ -228,18 +228,19 @@ public class UIManager : MonoBehaviour
 		setButtonsText (new string[] {
 			"Add Set To Device",
 			"Remove Set From Device",
-			"",
+			"Use as new Username",
 			"<<< BACK TO PROFILE"
 		});
-		setButtonBehaviors (new Action[] { addThisSet, removeThisSet, noMenu, profile });
+		setButtonBehaviors (new Action[] { addThisSet, removeThisSet, changeUsername, profile });
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
-		setDisplayText ("Go to\n" +
-		"www.meducate.cs.unc.edu\n" +
+		setDisplayText ("Go to www.meducate.cs.unc.edu\n" +
 		"to update and add question sets!\n\n" +
 		"Then, come back and type the name\n" +
-		"of the Question Set here!");
+		"of the Question Set here!\n\n" +
+		"You can also change your username here!\n\n" +
+		"Current Username: " + gameLogic.username);
 
 		gameLogic.inputfield.SetActive (true);
 
@@ -250,7 +251,10 @@ public class UIManager : MonoBehaviour
 	{
 		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text.Replace (' ', '_');
 		gameLogic.setsToAdd.Enqueue (setName);
+
+		gameLogic.updatePlayerPrefs ();
 		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Requested Set From Server!";
+
 		currentMenu = addQuestions;
 	}
 
@@ -263,7 +267,22 @@ public class UIManager : MonoBehaviour
 			}
 		}
 		gameLogic.setCurrentSet (0);
+
+		gameLogic.updatePlayerPrefs ();
 		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Removed Set From Device!";
+
+		currentMenu = addQuestions;
+	}
+
+	// Converts input field to all capital letters before changing the username
+	void changeUsername ()
+	{
+		string newName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text;
+		gameLogic.username = newName.ToUpper();
+
+		gameLogic.updatePlayerPrefs ();
+		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Updated Username!";
+
 		currentMenu = addQuestions;
 	}
 
@@ -550,7 +569,8 @@ public class UIManager : MonoBehaviour
 		"OR THE SINGLEPLAYER CAMPAIGN\n\n" +
 		"IF YOU'RE CONFIDENT IN YOUR SKILLS\n" +
 		"TRY JUMPING STRAIGHT INTO MULTIPLAYER\n\n" +
-		"HAVE FUN!\n\n" +
+		"HAVE FUN AND DON'T FORGET TO SET YOUR\n" +
+		"USERNAME IN THE PROFILE MENU!\n\n" +
 		gameLogic.displayText);
 
 		currentMenu = finalTutorialScreen;

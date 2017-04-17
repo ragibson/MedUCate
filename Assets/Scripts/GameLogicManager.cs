@@ -8,7 +8,7 @@ public class GameLogicManager : MonoBehaviour
 {
 
 	/*
-	 * 	TODO: Handle usernames
+	 * 	TODO: Handle usernames on server
 	 */
 
 	/*
@@ -26,6 +26,8 @@ public class GameLogicManager : MonoBehaviour
 	public int reputation;
 
 	public string displayText = "";
+
+	public string username = "NEW USER";
 
 	public Settings settings = new Settings ();
 	public ComputerPlayer computer = new ComputerPlayer ();
@@ -182,8 +184,7 @@ public class GameLogicManager : MonoBehaviour
 	// Saves settings to file
 	public void updatePlayerPrefs ()
 	{
-		// TODO: Handle usernames
-		PlayerPrefs.SetString ("Username", "NEW_USER");
+		PlayerPrefs.SetString ("Username", username);
 		PlayerPrefs.SetInt ("Completed Tutorial", (completedTutorial ? 1 : 0));
 		PlayerPrefs.SetInt ("Reputation", reputation);
 		for (int i = 0; i < 9; i++) {
@@ -197,7 +198,7 @@ public class GameLogicManager : MonoBehaviour
 	// Reads settings from file
 	public void getPlayerPrefs ()
 	{
-		// TODO: Handle usernames
+		username = PlayerPrefs.GetString ("Username");
 		campaignScores = new int[9];
 
 		completedTutorial = (PlayerPrefs.GetInt ("Completed Tutorial") == 1);
@@ -224,6 +225,7 @@ public class GameLogicManager : MonoBehaviour
 		reputation = 0;
 		completedTutorial = false;
 		selectedSet = 0;
+		username = "NEW USER";
 
 		questionSets = new List<QuestionSet> ();
 
