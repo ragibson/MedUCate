@@ -132,13 +132,20 @@ public class UIManager : MonoBehaviour
 			"PROFILE >>>",
 			"Exit"
 		});
-		setButtonBehaviors (new Action[] { singlePlayer, multiPlayer, profile, Application.Quit });
+		setButtonBehaviors (new Action[] { singlePlayer, multiPlayer, profile, exitGame });
 
 		setDisplayImage (images [0]);
 		setDisplayColor (Color.white);
 		setDisplayText ("");
 
 		currentMenu = mainMenu;
+	}
+
+	void exitGame() {
+		if (!Application.isEditor) {
+			System.Diagnostics.Process.GetCurrentProcess ().Kill ();
+		}
+		Application.Quit ();
 	}
 
 	void singlePlayer ()
