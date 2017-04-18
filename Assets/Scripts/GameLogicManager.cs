@@ -37,7 +37,9 @@ public class GameLogicManager : MonoBehaviour
 	// The input field for the "Add Questions" menu
 	public GameObject inputfield;
 
-	float serverTimeout = 2;
+	public float serverTimeout = 10;
+	public float timeLeftToWaitForServer = 0;
+
 	WWW setWWW = null;
 	String setNameToRetrieve = "";
 	bool initialSetupComplete = false;
@@ -59,12 +61,8 @@ public class GameLogicManager : MonoBehaviour
 	void Start ()
 	{
 		// Get default question sets
-		foreach (String s in new String[] { "Default_Mental_Health_Set",
-			"Default_Physical_Health_Set",
-			"Default_Social_Health_Set",	
-			"Default_Nutritional_Health_Set"
-		}) {
-			setsToAdd.Enqueue (s);
+		foreach (String s in new String[] { "Mental", "Physical", "Social", "Nutritional" }) {
+			setsToAdd.Enqueue ("Default_" + s + "_Health_Set");
 		}
 
 		getPlayerPrefs ();
@@ -79,11 +77,11 @@ public class GameLogicManager : MonoBehaviour
 	// Handles the retrieval of question sets with timeout
 	void Update ()
 	{
-		if (serverTimeout > 0 && setWWW != null && setsToAdd.Count > 0) {
-			serverTimeout -= Time.deltaTime;
+		if (timeLeftToWaitForServer > 0 && setWWW != null && setsToAdd.Count > 0) {
+			timeLeftToWaitForServer -= Time.deltaTime;
 
 			if (!String.IsNullOrEmpty (setWWW.error)) {
-				serverTimeout = 0;
+				timeLeftToWaitForServer = 0;
 			}
 
 			if (setWWW.isDone) {
@@ -102,15 +100,20 @@ public class GameLogicManager : MonoBehaviour
 					}
 				}
 
-				String setName = setNameToRetrieve.Replace ("_", " ").ToLower();
+				String setName = setNameToRetrieve.Replace ("_", " ").ToLower ();
 
 				addQuestionSet (new QuestionSet (questionsToAdd.ToArray (), setName, author));
 
 				setWWW = null;
-				serverTimeout = 0;
+				timeLeftToWaitForServer = 0;
 				setsToAdd.Dequeue ();
 			}
 		} else {
+			// If we've actually timed out, we request no more sets
+			if (timeLeftToWaitForServer < 0) {
+				setsToAdd.Clear ();
+			}
+
 			// Check if we need to add any more sets
 			if (setsToAdd.Count != 0) {
 				retrieveSetFromServer (setsToAdd.Peek ());
@@ -131,6 +134,12 @@ public class GameLogicManager : MonoBehaviour
 		}
 	}
 
+	// Returns true if we've waited two seconds or longer for a question set request
+	public bool serverSlowToRespond ()
+	{
+		return timeLeftToWaitForServer != 0 && (timeLeftToWaitForServer < serverTimeout - 2);
+	}
+
 	public bool addQuestionSet (QuestionSet setToAdd)
 	{
 		if (setToAdd.numberOfQuestions () == 0) {
@@ -138,7 +147,7 @@ public class GameLogicManager : MonoBehaviour
 		}
 
 		for (int i = 0; i < questionSets.Count; i++) {
-			if (String.Equals (questionSets [i].setName.ToLower(), "No Question Sets".ToLower())) {
+			if (String.Equals (questionSets [i].setName.ToLower (), "No Question Sets".ToLower ())) {
 				questionSets.RemoveAt (i);
 			}
 		}
@@ -161,7 +170,7 @@ public class GameLogicManager : MonoBehaviour
 		if (campaignScores [level] == 0) {
 			return "NOT YET COMPLETED";
 		}
-		return String.Format ("HIGH SCORE: {0}/200", campaignScores [level]);
+		return String.Format ("HIGH SCORE: {0}/{1}", campaignScores [level], gameHP);
 	}
 
 	// Returns whether player got a high score
@@ -372,10 +381,10 @@ public class GameLogicManager : MonoBehaviour
 
 	public void retrieveSetFromServer (String s)
 	{
-		setNameToRetrieve = s.ToLower();
+		setNameToRetrieve = s.ToLower ();
 		string setURL = String.Format ("http://meducate.cs.unc.edu/sets/{0}.csv", setNameToRetrieve);
 		setWWW = new WWW (setURL);
-		serverTimeout = 2;
+		timeLeftToWaitForServer = serverTimeout;
 
 		// Update will handle the rest of the retrieval
 	}

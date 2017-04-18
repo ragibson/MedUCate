@@ -278,7 +278,7 @@ public class UIManager : MonoBehaviour
 	void changeUsername ()
 	{
 		string newName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text;
-		gameLogic.username = newName.ToUpper();
+		gameLogic.username = newName.ToUpper ();
 
 		gameLogic.updatePlayerPrefs ();
 		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Updated Username!";
@@ -899,15 +899,26 @@ public class UIManager : MonoBehaviour
 			setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
 			setDisplayImage (images [5]);
 			setDisplayColor (Color.blue);
+
+			string slowLoading = "";
+
+			if (gameLogic.serverSlowToRespond ()) {
+				slowLoading = "This is taking longer than expected...\n\n" +
+				"You seem to be connected to the internet,\n" +
+				"but the server is not responding.\n" +
+				"Are you sure you're on UNC WiFi?\n" +
+				String.Format ("Giving up in {0} seconds...", (int)gameLogic.timeLeftToWaitForServer);
+			}
+
 			setDisplayText ("Connecting to meducate.cs.unc.edu...\n\n" +
-			String.Format ("Retrieving {0}", gameLogic.setsToAdd.Peek ()));
+			String.Format ("Retrieving {0}\n\n", gameLogic.setsToAdd.Peek ()) +
+			slowLoading);
+		} else {
 			if (gameLogic.completedTutorial) {
-				currentMenu = connectingToServer;
+				currentMenu = mainMenu;
 			} else {
 				currentMenu = tutorialStart;
 			}
-		} else {
-			currentMenu = mainMenu;
 		}
 	}
 
