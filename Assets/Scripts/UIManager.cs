@@ -6,6 +6,17 @@ using System;
 public class UIManager : MonoBehaviour
 {
 
+	/*
+	 * 	TODO: The following menu items were not
+	 * 	implemented in the original prototype
+	 * 	and have not been implemented here:
+	 * 		VIEW HISTORY
+	 * 		HOST GAME
+	 * 		JOIN GAME
+	 * 
+	 * 	TODO: Add server-based multiplayer
+	 */
+
 	public string addScoreURL = "meducate.cs.unc.edu/addscore.php?"; 
 	public string highscoreURL = "meducate.cs.unc.edu/display.php";
 	public string Scores;
@@ -788,7 +799,7 @@ public class UIManager : MonoBehaviour
 	{
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
-		setDisplayText ("Loading Scores");
+		Scores = "Loading Scores";
 		StartCoroutine(GetScores());
 		currentMenu = leaderboard;
 	}
@@ -969,6 +980,10 @@ public class UIManager : MonoBehaviour
 
 	void startGame ()
 	{
+		// Just in case, make sure objects are draggable
+		objects [0].GetComponent<Draggable> ().draggingEnabled = true;
+		objects [1].GetComponent<Draggable> ().draggingEnabled = true;
+
 		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
 		currentMenu = continueGame;
 	}
@@ -991,6 +1006,15 @@ public class UIManager : MonoBehaviour
 			setDisplayColor (new Color (0.0f, 0.5f, 0.0f));
 			gameLogic.displayText += "YOU WIN!\n\n";
 		}
+
+		// Restore ability to drag objects around for later games
+		objects [0].GetComponent<Draggable> ().draggingEnabled = true;
+		objects [1].GetComponent<Draggable> ().draggingEnabled = true;
+
+		gameLogic.displayText += gameLogic.changeReputation (game.playerHealth);
+
+		// Reset game mode
+		gameLogic.gameMode = "";
 
 		StartCoroutine(PostScores(gameLogic.username, gameLogic.reputation));
 		setDisplayText(Scores);
