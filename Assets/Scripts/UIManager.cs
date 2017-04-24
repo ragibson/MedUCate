@@ -6,23 +6,9 @@ using System;
 public class UIManager : MonoBehaviour
 {
 
-	/*
-	 * 	TODO: The following menu items were not
-	 * 	implemented in the original prototype
-	 * 	and have not been implemented here:
-	 * 		VIEW HISTORY
-	 * 		HOST GAME
-	 * 		JOIN GAME
-	 * 
-	 * 	TODO: Add server-based multiplayer
-	 * 
-	 * 	TODO: LEADERBOARD needs to be connected
-	 * 	to the server once networking  for the
-	 * 	game is more complete.
-	 */
-
 	public string addScoreURL = "meducate.cs.unc.edu/addscore.php?"; 
 	public string highscoreURL = "meducate.cs.unc.edu/display.php";
+	public string Scores;
 
 	private Settings settings;
 	private ComputerPlayer computer;
@@ -803,6 +789,7 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("Loading Scores");
+		StartCoroutine(GetScores());
 		currentMenu = leaderboard;
 	}
 
@@ -819,21 +806,20 @@ public class UIManager : MonoBehaviour
 			noMenu,
 			multiPlayerOneManArmy
 		});
-		StartCoroutine(GetScores());
+		setDisplayText(Scores);
 	}
 
 	IEnumerator PostScores(string name, int score)
-	{
-		var hash= Md5Sum(name + score); 
+	{ 
 
-		string post_url = addScoreURL + "name=" + WWW.EscapeURL (name) + "&score=" + score; //+ "&hash=" + hash;
+		string post_url = addScoreURL + "name=" + WWW.EscapeURL (name) + "&score=" + score;
 
 		WWW hs_post = new WWW(post_url);
 		yield return hs_post;
 
 		if (hs_post.error != null)
 		{
-			setDisplayText("There was an error posting the high score: " + hs_post.error);
+			Scores = "There was an error posting the high score: " + hs_post.error;
 		}
 	}
 
@@ -842,14 +828,14 @@ public class UIManager : MonoBehaviour
 		WWW hs_get = new WWW(highscoreURL);
 		yield return hs_get;
 
-		if (hs_get.error != null)
+		if (hs_get.error != null) 
 		{
-			print("There was an error getting the high score: " + hs_get.error);
-		}
+			Scores = "There was an error getting the high score board: " + hs_get.error;
+		} 
 		else
 		{
-			setDisplayText (hs_get.text);
-		}
+			Scores = hs_get.text;
+		} 
 	}
 	void changeQuestions ()
 	{
@@ -1006,8 +992,8 @@ public class UIManager : MonoBehaviour
 			gameLogic.displayText += "YOU WIN!\n\n";
 		}
 
-		print(gameLogic.username+gameLogic.reputation);
 		StartCoroutine(PostScores(gameLogic.username, gameLogic.reputation));
+		setDisplayText(Scores);
 		currentMenu = endGameScreen;
 	}
 
@@ -1182,24 +1168,5 @@ public class UIManager : MonoBehaviour
 			gameLogic.deleteAllPrefs ();
 			currentMenu = mainMenu;
 		}
-	}
-	public  string Md5Sum(string strToEncrypt)
-	{
-		System.Text.UTF8Encoding ue = new System.Text.UTF8Encoding();
-		byte[] bytes = ue.GetBytes(strToEncrypt);
-
-		// encrypt bytes
-		System.Security.Cryptography.MD5CryptoServiceProvider md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-		byte[] hashBytes = md5.ComputeHash(bytes);
-
-		// Convert the encrypted bytes back to a string (base 16)
-		string hashString = "";
-
-		for (int i = 0; i < hashBytes.Length; i++)
-		{
-			hashString += System.Convert.ToString(hashBytes[i], 16).PadLeft(2, '0');
-		}
-
-		return hashString.PadLeft(32, '0');
 	}
 }
