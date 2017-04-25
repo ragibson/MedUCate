@@ -4,6 +4,7 @@
   * [Adding Question Sets](#QuestionSets)
   * [Setting Up Server](#Server)
   * [Leaderboard Setup](#Leaderboard)
+  * [Website Setup](#Website)
 
 <a name = "QuestionSets"></a>
 ## Adding Question Sets
@@ -42,3 +43,12 @@ First, create a mysql database and a table to hold leaderboard scores (e.g. crea
 Then, place the addscore.php and display.php scripts in "DocumentRoot/html" and update the $username, $password, $database values in these scripts to match your setup.
 
 Finally, update the addScoreURL and highScoreURL in [UIManager.cs](../Assets/Scripts/UIManager.cs) and the leaderboard will work with the game.
+
+<a name = "Website"></a>
+## Website Setup
+
+The specifics of the website setup are yours to change.
+
+Our example website prototype is in this Networking directory: [AddQuestions.html](AddQuestions.html), [index.html](index.html), [style.css](style.css), [upload.php](upload.php).
+
+Our upload php script places the uploaded .csv files into the "DocumentRoot/uploads" folder, which will then have to be manually curated and placed into the "DocumentRoot/sets" folder in order to be used in game. 
