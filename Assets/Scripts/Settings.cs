@@ -9,10 +9,7 @@ public class Settings
 
 	// === Multiplayer Quick Play === //
 	public int multiplayerMode = 0;
-	public string[] multiplayerModes = new string[] { "CHOSEN - USE YOUR (OR THEIR) QUESTIONS",
-		"SPONSORED - USE THE DAILY SPONSORED QUESTIONS",
-		"RANDOM - USE ANY QUESTIONS"
-	};
+	public string[] multiplayerModes = new string[] { "USE THE HOST'S SELECTED QUESTION SET" };
 
 	// === Multiplayer One Man Army === //
 	public int wagerIndex = 0;

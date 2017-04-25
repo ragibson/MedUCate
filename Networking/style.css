@@ -1,0 +1,67 @@
+body {
+    margin: 0;
+}
+.MeducateTitleBar {
+    overflow: hidden;
+    background-color: #7BAFD4;
+    color: white;
+    margin: 0;
+    height: 100px;
+}
+.MeducateTitleBar h1 {
+    font-size: 40px;
+    text-align: center;
+    vertical-align: middle;
+}
+.topnav {
+    overflow: hidden;
+    background-color: #333;
+    font-size: 20px;
+}
+.topnav a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+.topnav a:hover {
+    background-color: #ddd;
+    color: black;
+}
+.topnav a.active {
+    background-color: #4CAF50;
+    color: white;
+}
+.mainDisplay {
+    padding=0px;
+}
+.pageContents {
+    padding-left: 16px;
+}
+#ExcelTutorialBar {
+    background-color: #008000;
+    color: white;
+    height: 60px;
+    width: 70%;
+    font-size: 20px;
+    padding: 14px 16px;
+    margin: 0;
+}
+#ExcelTutorialContents {
+    padding-left: 16px;
+}
+#UploadCenterBar {
+    background-color: red;
+    color: white;
+    height: 60px;
+    width: 70%;
+    font-size: 20px;
+    padding: 14px 16px;
+    margin: 0;
+}
+#UploadCenter {
+    padding-left: 16px;
+}

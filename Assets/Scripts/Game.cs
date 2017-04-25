@@ -10,7 +10,7 @@ public class Game
 	public float playerHealth;
 	public float enemyHealth;
 
-	public Queue<Question> questionsToAsk = new Queue<Question>();
+	public Queue<Question> questionsToAsk = new Queue<Question> ();
 
 	public Game (float HP, float secondsPerRound, float defaultDamage)
 	{
@@ -31,17 +31,18 @@ public class Game
 
 	private int round = 1;
 
-	public void fillQuestionQueue(QuestionSet currentSet) {
+	public void fillQuestionQueue (QuestionSet currentSet)
+	{
 		List<int> questionIds = new List<int> ();
-		for (int i = 0; i < currentSet.numberOfQuestions(); i++) {
+		for (int i = 0; i < currentSet.numberOfQuestions (); i++) {
 			questionIds.Add (i);
 		}
 
 		for (int i = 0; i < questionIds.Count; i++) {
-			int temp = questionIds[i];
-			int randomIndex = Random.Range(i, questionIds.Count);
-			questionIds[i] = questionIds[randomIndex];
-			questionIds[randomIndex] = temp;
+			int temp = questionIds [i];
+			int randomIndex = Random.Range (i, questionIds.Count);
+			questionIds [i] = questionIds [randomIndex];
+			questionIds [randomIndex] = temp;
 		}
 
 		foreach (int i in questionIds) {
@@ -58,7 +59,23 @@ public class Game
 		Question currentQuestion = questionsToAsk.Dequeue ();
 		answers = currentQuestion.shuffledAnswers ();
 
-		gameLogic.computer.updateTimeAndAnswer ();
+		// If not networked, use computer player
+		if (!gameLogic.currentlyNetworking ()) {
+			gameLogic.computer.updateTimeAndAnswer ();
+		} else {
+			resetNetworkedAnswers ();
+		}
+
+		currentTriviaRound = new TriviaRound (roundTime, currentQuestion, answers, currentQuestion.correctAnswer, round);
+		round += 1;
+	}
+
+	public void networkedNextRound (string q, string a1, string a2, string a3, string a4)
+	{
+		Question currentQuestion = new Question (q, a1, a2, a3, a4);
+		string[] answers = currentQuestion.shuffledAnswers ();
+
+		resetNetworkedAnswers ();
 
 		currentTriviaRound = new TriviaRound (roundTime, currentQuestion, answers, currentQuestion.correctAnswer, round);
 		round += 1;
@@ -72,6 +89,29 @@ public class Game
 	public void answerClicked (int i)
 	{
 		currentTriviaRound.answerChosen (i);
+
+		if (gameLogic.currentlyNetworking ()) {
+			if (gameLogic.isServer) {
+				gameLogic.ourGamestate.RpcUpdateServerAnswerCorrect (currentTriviaRound.correct);
+				gameLogic.ourGamestate.RpcUpdateServerAnswerTime (currentTriviaRound.answerTime);
+			} else {
+				gameLogic.ourGamestate.CmdUpdateClientAnswerCorrect (currentTriviaRound.correct);
+				gameLogic.ourGamestate.CmdUpdateClientAnswerTime (currentTriviaRound.answerTime);
+			}
+		}
+	}
+
+	public void resetNetworkedAnswers ()
+	{
+		if (gameLogic.currentlyNetworking ()) {
+			if (gameLogic.isServer) {
+				gameLogic.ourGamestate.RpcUpdateServerAnswerCorrect (false);
+				gameLogic.ourGamestate.RpcUpdateServerAnswerTime (gameLogic.secondsPerRound);
+			} else {
+				gameLogic.ourGamestate.CmdUpdateClientAnswerCorrect (false);
+				gameLogic.ourGamestate.CmdUpdateClientAnswerTime (gameLogic.secondsPerRound);
+			}
+		}
 	}
 
 	// ===   COMBAT ROUND   === //

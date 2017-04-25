@@ -3,13 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class GameLogicManager : MonoBehaviour
 {
-
-	/*
-	 * 	TODO: Handle usernames on server
-	 */
 
 	/*
 	 *	In initial prototype, these were set to 200, 10, and 25, respectively.
@@ -39,6 +36,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public float serverTimeout = 10;
 	public float timeLeftToWaitForServer = 0;
+	public float gameSyncTime = 1;
 
 	WWW setWWW = null;
 	String setNameToRetrieve = "";
@@ -55,11 +53,22 @@ public class GameLogicManager : MonoBehaviour
 	public string gameMode = "";
 	public int[] campaignScores;
 
+	// === Multiplayer === //
+	public bool isServer = false;
+	public NetworkGameState ourGamestate;
+	public NetworkGameState theirGamestate;
+	public string roomName = "";
+	public int roomNumber = 0;
+
+	public MatchMaking matchMaker;
+
 	public Queue<String> setsToAdd = new Queue<String> ();
 
 	// Initialization
 	void Start ()
 	{
+		matchMaker = GameObject.Find ("Network Manager").GetComponent<MatchMaking> ();
+
 		// Get default question sets
 		foreach (String s in new String[] { "Mental", "Physical", "Social", "Nutritional" }) {
 			setsToAdd.Enqueue ("Default_" + s + "_Health_Set");
@@ -71,7 +80,18 @@ public class GameLogicManager : MonoBehaviour
 			UIManager UI = GameObject.Find ("UI").GetComponent<UIManager> ();
 			UI.currentMenu = UI.debugWipeAllSettings;
 		}
+	}
 
+	private void Awake ()
+	{
+		Application.logMessageReceived += handleUnityLog;
+	}
+
+	void handleUnityLog (string logString, string stackTrace, LogType type)
+	{
+		if (type.ToString ().Equals ("Exception") || type.ToString ().Equals ("Error")) {
+			GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
+		}
 	}
 
 	// Handles the retrieval of question sets with timeout
@@ -439,6 +459,54 @@ public class GameLogicManager : MonoBehaviour
 		return str.ToArray ();
 	}
 
+	public bool networkedTheirAnswerCorrect ()
+	{
+		if (this.isServer) {
+			return theirGamestate.clientAnswerCorrect;
+		} else {
+			return theirGamestate.serverAnswerCorrect;
+		}
+	}
+
+	public bool networkedOurAnswerCorrect ()
+	{
+		if (this.isServer) {
+			return ourGamestate.serverAnswerCorrect;
+		} else {
+			return ourGamestate.clientAnswerCorrect;
+		}
+	}
+
+	public float networkedTheirAnswerTime ()
+	{
+		if (this.isServer) {
+			return theirGamestate.clientAnswerTime;
+		} else {
+			return theirGamestate.serverAnswerTime;
+		}
+	}
+
+	public float networkedOurAnswerTime ()
+	{
+		if (this.isServer) {
+			return ourGamestate.serverAnswerTime;
+		} else {
+			return ourGamestate.clientAnswerTime;
+		}
+	}
+
+	public bool currentlyNetworking ()
+	{
+		return ourGamestate != null && theirGamestate != null;
+	}
+
+	public void closeAllNetworking ()
+	{
+		matchMaker.endMatchMaker ();
+		GameObject.Find ("Network Manager").GetComponent<NetworkManager> ().StopHost ();
+		ourGamestate = null;
+		theirGamestate = null;
+	}
 
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
 	// === MANIPULATION FROM THE VARIOUS GAME MENUS  === //
@@ -504,13 +572,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void decreaseSetToChange ()
 	{
-		/*
-		 * 	This is equivalent to subtracting 1 modulo
-		 * 	questionSets.Length
-		 * 
-		 * 	This is just since modulo of negative numbers
-		 * 	does not behave as needed.
-		 */
+		//	This is equivalent to subtracting 1 modulo Length
 		setToChange += questionSets.Count - 1;
 		setToChange %= questionSets.Count;
 	}
@@ -528,13 +590,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void decreaseCurrentQuestion ()
 	{
-		/*
-		 * 	This is equivalent to subtracting 1 modulo
-		 * 	questionSets [selectedSet].numberOfQuestions()
-		 * 
-		 * 	This is just since modulo of negative numbers
-		 * 	does not behave as needed.
-		 */
+		//	This is equivalent to subtracting 1 modulo Length
 		currentQuestion += questionSets [selectedSet].numberOfQuestions () - 1;
 		currentQuestion %= questionSets [selectedSet].numberOfQuestions ();
 	}
@@ -560,6 +616,16 @@ public class GameLogicManager : MonoBehaviour
 			                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
 			                          objects [2].transform.position.z);
 		objects [2].transform.position = randomPlacement;
+	}
+
+	public void increaseRoomNumber ()
+	{
+		if (matchMaker.roomList != null && matchMaker.roomList.Count > 0) {
+			roomNumber += 1;
+			roomNumber %= matchMaker.roomList.Count;
+		} else {
+			roomNumber = 0;
+		}
 	}
 
 }
