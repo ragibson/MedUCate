@@ -198,26 +198,21 @@ public class UIManager : MonoBehaviour
 	void multiPlayer ()
 	{
 		setButtonsText (new string[] { "QUICK PLAY >>>",
-			"BATTLE CODE >>>", 
 			"ONE MAN ARMY >>>",
+			"",
 			"<<< BACK TO MENU"
 		});
-		setButtonBehaviors (new Action[] { multiPlayerQuickPlay, multiPlayerBattleCode, multiPlayerOneManArmy, mainMenu });
+		setButtonBehaviors (new Action[] { multiPlayerQuickPlay, multiPlayerOneManArmy, noMenu, mainMenu });
 
 		setDisplayImage (images [2]);
 		setDisplayColor (Color.red);
 		setDisplayText ("MAIN MENU > MULTIPLAYER\n\n" +
 		"QUICK PLAY -\n" +
 		"PLAY QUESTIONS AGAINST A\n" +
-		"RANDOM HUMAN OPPONENT\n\n" +
-		"BATTLE CODE -\n" +
-		"CREATE AND SHARE CODES TO\n" +
-		"SELECT QUESTIONS AND WHO YOU\n" +
-		"PLAY AGAINST\n\n" +
+		"HUMAN OPPONENT\n\n" +
 		"ONE MAN ARMY -\n" +
 		"RISK REPUTATION TO EARN A SPOT\n" +
-		"ON THE LEADERBOARDS FOR THE\n" +
-		"SPONSORED QUESTIONS");
+		"ON THE LEADERBOARD");
 
 		currentMenu = multiPlayer;
 	}
@@ -651,15 +646,15 @@ public class UIManager : MonoBehaviour
 
 	void multiPlayerQuickPlay ()
 	{
-		setButtonsText (new string[] { "<<< START GAME >>>",
-			"<<< VIEW HISTORY >>>", 
-			"CHANGE TYPE >>>",
+		setButtonsText (new string[] { "<<< HOST GAME >>>",
+			"<<< JOIN GAME >>>", 
+			"",
 			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
 			multiPlayerQuickPlayStartGame,
 			noMenu,
-			settings.changeMultiPlayerType,
+			noMenu,
 			multiPlayer
 		});
 
@@ -672,9 +667,6 @@ public class UIManager : MonoBehaviour
 		"CURRENT QUESTIONS -\n" +
 		settings.selected.setName +
 		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
-		"SPONSORED QUESTIONS -\n" +
-		"DEFAULT NUTRITIONAL HEALTH SET\n" +
-		"(THESE CHANGE EVERY DAY)\n\n" +
 		"CURRENT MODE -\n" +
 		settings.getMultiPlayerModeString () +
 		String.Format ("\n(OPTION {0} OF {1})\n\n", settings.multiplayerMode + 1, settings.multiplayerModes.Length));
@@ -844,34 +836,6 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
-	void multiPlayerBattleCode ()
-	{
-		setButtonsText (new string[] { "<<< JOIN GAME >>>",
-			"<<< VIEW HISTORY >>>", 
-			"<<< HOST GAME >>>",
-			"<<< BACK TO MULTIPLAYER"
-		});
-		setButtonBehaviors (new Action[] {
-			startGame,
-			noMenu,
-			startGame,
-			multiPlayer
-		});
-
-		setDisplayImage (images [5]);
-		setDisplayColor (Color.blue);
-		setDisplayText ("MAIN MENU > MULTIPLAYER > BATTLE CODES\n\n" +
-		"CURRENT QUESTIONS -\n" +
-		settings.selected.setName +
-		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
-		"THE HOST USES THEIR QUESTION SET. THE PLAYER\n" +
-		"THAT JOINS WILL USE THE QUESTIONS OF THE HOST.\n" +
-		"WHEN YOU HOST A GAME, YOU WILL RECEIVE A CODE\n" +
-		"TO SHARE WITH THE PERSON YOU WANT TO PLAY WITH");
-
-		currentMenu = multiPlayerBattleCode;
-	}
-
 	void multiPlayerOneManArmy ()
 	{
 		string startGameText = "<<< START GAME >>>";
@@ -894,9 +858,9 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > MULTIPLAYER > ONE MAN ARMY\n\n" +
-		"SPONSORED QUESTIONS -\n" +
-		"DEFAULT NUTRITIONAL HEALTH SET\n" +
-		"(THESE CHANGE EVERY DAY)\n\n" +
+		"CURRENTLY SELECTED SET NAME -\n" +
+		settings.selected.setName +
+		"\n\n" +
 		"CURRENT REPUTATION -\n" +
 		String.Format ("{0}\n", gameLogic.reputation) +
 		"(THIS CHANGES AS YOU PLAY MORE GAMES)\n\n" +
