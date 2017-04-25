@@ -9,11 +9,10 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 
 <a name = "TODO"></a>
 ## TODO
-  * Networking
-    * Handle multiplayer
-  * UIManager.cs
-    * Implement "HOST GAME"
-    * Implement "JOIN GAME"
+  * General
+    * Comment code
+    * Add documentation
+    * Bug testing
 
 <a name = "Requirements"></a>
 ## Requirements

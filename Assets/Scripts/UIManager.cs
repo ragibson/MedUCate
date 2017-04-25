@@ -6,17 +6,6 @@ using System;
 public class UIManager : MonoBehaviour
 {
 
-	/*
-	 * 	TODO: The following menu items were not
-	 * 	implemented in the original prototype
-	 * 	and have not been implemented here:
-	 * 		VIEW HISTORY
-	 * 		HOST GAME
-	 * 		JOIN GAME
-	 * 
-	 * 	TODO: Add server-based multiplayer
-	 */
-
 	public string addScoreURL = "meducate.cs.unc.edu/addscore.php?";
 	public string highscoreURL = "meducate.cs.unc.edu/display.php";
 	public string Scores;
@@ -652,11 +641,13 @@ public class UIManager : MonoBehaviour
 			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
-			multiPlayerQuickPlayStartGame,
-			noMenu,
+			setupHostGameMenu,
+			setupJoinGameMenu,
 			noMenu,
 			multiPlayer
 		});
+
+		gameLogic.matchMaker.endMatchMaker ();
 
 		slider.value = gameLogic.secondsPerRound / 2;
 		slider.GetComponentInChildren<Text> ().text = "" + 0;
@@ -672,6 +663,108 @@ public class UIManager : MonoBehaviour
 		String.Format ("\n(OPTION {0} OF {1})\n\n", settings.multiplayerMode + 1, settings.multiplayerModes.Length));
 
 		currentMenu = multiPlayerQuickPlay;
+	}
+
+	void setupHostGameMenu ()
+	{
+		System.Random random = new System.Random ();
+		gameLogic.roomName = gameLogic.username +
+		"-" + gameLogic.settings.selected.setName + "-" +
+		random.Next (1000, 9999);
+		currentMenu = multiPlayerHostGame;
+	}
+
+	void hostGame ()
+	{
+		gameLogic.matchMaker.startMatchMaker ();
+		gameLogic.matchMaker.startMatch (gameLogic.roomName);
+		currentMenu = multiPlayerQuickPlayStartGame;
+	}
+
+	void multiPlayerHostGame ()
+	{
+		setButtonsText (new string[] { "<<< START >>>",
+			"", 
+			"",
+			"<<< BACK TO QUICK PLAY"
+		});
+		setButtonBehaviors (new Action[] {
+			hostGame,
+			noMenu,
+			noMenu,
+			multiPlayerQuickPlay
+		});
+
+		slider.value = gameLogic.secondsPerRound / 2;
+		slider.GetComponentInChildren<Text> ().text = "" + 0;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("MAIN MENU > MULTIPLAYER > QUICK PLAY > HOST GAME\n\n" +
+		"CURRENT QUESTIONS -\n" +
+		settings.selected.setName +
+		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
+		"ROOM NAME:\n" + gameLogic.roomName);
+
+		currentMenu = multiPlayerHostGame;
+	}
+
+	void setupJoinGameMenu ()
+	{
+		gameLogic.matchMaker.joiningGame = false;
+		gameLogic.roomNumber = 0;
+		gameLogic.matchMaker.startMatchMaker ();
+		gameLogic.matchMaker.listMatches ();
+		currentMenu = multiPlayerJoinGame;
+	}
+
+	void multiPlayerJoinGame ()
+	{
+		string joinText = "<<< JOIN >>>";
+		if (gameLogic.matchMaker.joiningGame) {
+			joinText = "JOINING...";
+		}
+
+		setButtonsText (new string[] { joinText,
+			"NEXT ROOM >>>", 
+			"<<< REFRESH LIST >>>",
+			"<<< BACK TO QUICK PLAY"
+		});
+		setButtonBehaviors (new Action[] {
+			joinGame,
+			gameLogic.increaseRoomNumber,
+			setupJoinGameMenu,
+			multiPlayerQuickPlay
+		});
+
+		slider.value = gameLogic.secondsPerRound / 2;
+		slider.GetComponentInChildren<Text> ().text = "" + 0;
+
+		string roomNameToJoin = "Loading...";
+		string roomCountString = "";
+		if (gameLogic.matchMaker.roomList != null) {
+			int numRooms = gameLogic.matchMaker.roomList.Count;
+			if (numRooms > 0) {
+				roomNameToJoin = gameLogic.matchMaker.roomNameToJoin (gameLogic.roomNumber);
+				roomCountString = (gameLogic.roomNumber + 1) + " OUT OF " + numRooms;
+			} else {
+				roomNameToJoin = "No rooms exist!";
+			}
+		}
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("MAIN MENU > MULTIPLAYER > QUICK PLAY > JOIN GAME\n\n" +
+		"CURRENT ROOM NAME:\n" +
+		roomNameToJoin + "\n" +
+		roomCountString);
+
+		currentMenu = multiPlayerJoinGame;
+	}
+
+	void joinGame ()
+	{
+		gameLogic.matchMaker.joinGame (gameLogic.roomNumber);
 	}
 
 	void closeNetworkingThenMultiPlayerQuickPlay ()
@@ -700,6 +793,8 @@ public class UIManager : MonoBehaviour
 		setDisplayColor (Color.red);
 		setDisplayText ("Opponent Disconnected or\n" +
 		"we hit a fatal error.\n\n" +
+		"If this is reproducable,\n" +
+		"please contact the developers.\n\n" +
 		"Exiting game...");
 		setButtonsText (new string[] { "", "", "", "" });
 		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
@@ -780,6 +875,9 @@ public class UIManager : MonoBehaviour
 		slider.value -= Time.deltaTime;
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
+		setButtonsText (new string[] { "", "", "", "" });
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
+
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("Found an Opponent!\n\n" +
@@ -812,7 +910,7 @@ public class UIManager : MonoBehaviour
 			network.RpcUpdateRoundNumber (game.currentTriviaRound.round);
 		}
 
-		slider.value = 2;
+		slider.value = gameLogic.gameSyncTime;
 		currentMenu = multiplayerNextRoundSyncTime;
 	}
 
@@ -1083,13 +1181,20 @@ public class UIManager : MonoBehaviour
 				game.networkedNextRound (network.questionText, network.answer1, network.answer2, network.answer3, network.answer4);
 
 				if (game.currentTriviaRound.round != gameLogic.theirGamestate.roundNumber) {
-					// TODO: Exit game here
-					Debug.Log ("DESYNC -- LOST INTERNET");
+					// Desync -- if this happens, we'll probably hit another exception first
+					fatalError ();
 				}
+			} else {
+				RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
+				gameLogic.randomlyPlaceStar (bounds, objects);
 			}
 		} else {
 			game.nextRound ();
+
+			RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
+			gameLogic.randomlyPlaceStar (bounds, objects);
 		}
+
 		currentMenu = triviaRound;
 	}
 
@@ -1178,12 +1283,11 @@ public class UIManager : MonoBehaviour
 			game.nextCombat ();
 
 			RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
-			gameLogic.randomlyPlaceStar (bounds, objects);
 
 			if (!gameLogic.currentlyNetworking ()) {
 				gameLogic.computer.placeBlock (game.currentTriviaRound.playerAttacks (computer), bounds, objects);
 			}
-
+			
 			currentMenu = combatRound;
 
 			if (game.currentTriviaRound.skipCombat (computer)) {
@@ -1247,7 +1351,7 @@ public class UIManager : MonoBehaviour
 					gameLogic.theirGamestate.RpcUpdateDamageBlocked (damageBlocked);
 				}
 
-				slider.value = 2;
+				slider.value = gameLogic.gameSyncTime;
 				currentMenu = multiplayerCombatResultsSyncTime;
 			} else {
 				slider.value = game.roundTime / 2;

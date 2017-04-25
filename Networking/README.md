@@ -5,6 +5,7 @@
   * [Setting Up Server](#Server)
   * [Leaderboard Setup](#Leaderboard)
   * [Website Setup](#Website)
+  * [Multiplayer Setup](#Multiplayer)
 
 <a name = "QuestionSets"></a>
 ## Adding Question Sets
@@ -51,4 +52,13 @@ The specifics of the website setup are yours to change.
 
 Our example website prototype is in this Networking directory: [AddQuestions.html](AddQuestions.html), [index.html](index.html), [style.css](style.css), [upload.php](upload.php).
 
-Our upload php script places the uploaded .csv files into the "DocumentRoot/uploads" folder, which will then have to be manually curated and placed into the "DocumentRoot/sets" folder in order to be used in game. 
+Our upload php script places the uploaded .csv files into the "DocumentRoot/uploads" folder, which will then have to be manually curated and placed into the "DocumentRoot/sets" folder in order to be used in game.
+
+<a name = "Multiplayer"></a>
+## Multiplayer Setup
+
+The game currently runs using my Unity multiplayer personal subscription. You will NOT be able to access this.
+
+You must set the game up in the Unity editor for your own multiplayer subscription (20 concurrent users / 10 concurrent games for free).
+
+Alternatively, install Unity's matchmaking utilities on the server (for "unlimited" concurrent users) and update the Network Manager's "Matchmaker Host" in the Unity editor.

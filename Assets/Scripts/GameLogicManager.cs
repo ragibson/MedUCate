@@ -9,10 +9,6 @@ public class GameLogicManager : MonoBehaviour
 {
 
 	/*
-	 * 	TODO: Handle usernames on server
-	 */
-
-	/*
 	 *	In initial prototype, these were set to 200, 10, and 25, respectively.
 	 *
 	 *	Should consider shortening game length by changing these.
@@ -40,6 +36,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public float serverTimeout = 10;
 	public float timeLeftToWaitForServer = 0;
+	public float gameSyncTime = 1;
 
 	WWW setWWW = null;
 	String setNameToRetrieve = "";
@@ -60,12 +57,18 @@ public class GameLogicManager : MonoBehaviour
 	public bool isServer = false;
 	public NetworkGameState ourGamestate;
 	public NetworkGameState theirGamestate;
+	public string roomName = "";
+	public int roomNumber = 0;
+
+	public MatchMaking matchMaker;
 
 	public Queue<String> setsToAdd = new Queue<String> ();
 
 	// Initialization
 	void Start ()
 	{
+		matchMaker = GameObject.Find ("Network Manager").GetComponent<MatchMaking> ();
+
 		// Get default question sets
 		foreach (String s in new String[] { "Mental", "Physical", "Social", "Nutritional" }) {
 			setsToAdd.Enqueue ("Default_" + s + "_Health_Set");
@@ -86,7 +89,9 @@ public class GameLogicManager : MonoBehaviour
 
 	void handleUnityLog (string logString, string stackTrace, LogType type)
 	{
-		GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
+		if (type.ToString ().Equals ("Exception") || type.ToString ().Equals ("Error")) {
+			GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
+		}
 	}
 
 	// Handles the retrieval of question sets with timeout
@@ -497,6 +502,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void closeAllNetworking ()
 	{
+		matchMaker.endMatchMaker ();
 		GameObject.Find ("Network Manager").GetComponent<NetworkManager> ().StopHost ();
 		ourGamestate = null;
 		theirGamestate = null;
@@ -566,13 +572,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void decreaseSetToChange ()
 	{
-		/*
-		 * 	This is equivalent to subtracting 1 modulo
-		 * 	questionSets.Length
-		 * 
-		 * 	This is just since modulo of negative numbers
-		 * 	does not behave as needed.
-		 */
+		//	This is equivalent to subtracting 1 modulo Length
 		setToChange += questionSets.Count - 1;
 		setToChange %= questionSets.Count;
 	}
@@ -590,13 +590,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void decreaseCurrentQuestion ()
 	{
-		/*
-		 * 	This is equivalent to subtracting 1 modulo
-		 * 	questionSets [selectedSet].numberOfQuestions()
-		 * 
-		 * 	This is just since modulo of negative numbers
-		 * 	does not behave as needed.
-		 */
+		//	This is equivalent to subtracting 1 modulo Length
 		currentQuestion += questionSets [selectedSet].numberOfQuestions () - 1;
 		currentQuestion %= questionSets [selectedSet].numberOfQuestions ();
 	}
@@ -622,6 +616,16 @@ public class GameLogicManager : MonoBehaviour
 			                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
 			                          objects [2].transform.position.z);
 		objects [2].transform.position = randomPlacement;
+	}
+
+	public void increaseRoomNumber ()
+	{
+		if (matchMaker.roomList != null && matchMaker.roomList.Count > 0) {
+			roomNumber += 1;
+			roomNumber %= matchMaker.roomList.Count;
+		} else {
+			roomNumber = 0;
+		}
 	}
 
 }
