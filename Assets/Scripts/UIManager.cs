@@ -17,7 +17,7 @@ public class UIManager : MonoBehaviour
 	 * 	TODO: Add server-based multiplayer
 	 */
 
-	public string addScoreURL = "meducate.cs.unc.edu/addscore.php?"; 
+	public string addScoreURL = "meducate.cs.unc.edu/addscore.php?";
 	public string highscoreURL = "meducate.cs.unc.edu/display.php";
 	public string Scores;
 
@@ -43,12 +43,13 @@ public class UIManager : MonoBehaviour
 	 */
 	void Start ()
 	{
-		objectVisibility (false, false, false);
 		settings = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ().settings;
 		computer = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ().computer;
 		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
 		slider = GameObject.Find ("Timer Slider").GetComponent<Slider> ();
 		currentMenu = connectingToServer;
+
+		objectVisibility (false, false, false);
 	}
 	
 	// Update is called once per frame
@@ -66,6 +67,24 @@ public class UIManager : MonoBehaviour
 		objects [0].SetActive (sword);
 		objects [1].SetActive (shield);
 		objects [2].SetActive (star);
+
+		if (gameLogic.currentlyNetworking ()) {
+			networkedObjectAuthority (sword, shield, star);
+		}
+	}
+
+	void networkedObjectAuthority (bool sword, bool shield, bool star)
+	{
+		if (gameLogic.isServer) {
+			// If the server can see the object, it has authority over it
+			gameLogic.ourGamestate.RpcUpdateClientSwordAuthority (!sword);
+			gameLogic.ourGamestate.RpcUpdateClientShieldAuthority (!shield);
+			gameLogic.ourGamestate.RpcUpdateClientStarAuthority (!star);
+
+			gameLogic.theirGamestate.RpcUpdateClientSwordAuthority (!sword);
+			gameLogic.theirGamestate.RpcUpdateClientShieldAuthority (!shield);
+			gameLogic.theirGamestate.RpcUpdateClientStarAuthority (!star);
+		}
 	}
 
 	/*
@@ -141,11 +160,14 @@ public class UIManager : MonoBehaviour
 		currentMenu = mainMenu;
 	}
 
-	void exitGame() {
+	void exitGame ()
+	{
+		Application.Quit ();
+
+		// Unity standalone crash bug fix
 		if (!Application.isEditor) {
 			System.Diagnostics.Process.GetCurrentProcess ().Kill ();
 		}
-		Application.Quit ();
 	}
 
 	void singlePlayer ()
@@ -641,6 +663,9 @@ public class UIManager : MonoBehaviour
 			multiPlayer
 		});
 
+		slider.value = gameLogic.secondsPerRound / 2;
+		slider.GetComponentInChildren<Text> ().text = "" + 0;
+
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > MULTIPLAYER > QUICK PLAY\n\n" +
@@ -657,19 +682,57 @@ public class UIManager : MonoBehaviour
 		currentMenu = multiPlayerQuickPlay;
 	}
 
+	void closeNetworkingThenMultiPlayerQuickPlay ()
+	{
+		gameLogic.closeAllNetworking ();
+		currentMenu = multiPlayerQuickPlay;
+	}
+
+	/*
+	 * 	Unity networking is currently unable to handle errors, so
+	 * 	we have to exit the application completely
+	 */
+	public void fatalError ()
+	{
+		gameLogic.closeAllNetworking ();
+		slider.value = gameLogic.secondsPerRound / 2;
+		currentMenu = fatalErrorNotification;
+	}
+
+	void fatalErrorNotification ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.red);
+		setDisplayText ("Opponent Disconnected or\n" +
+		"we hit a fatal error.\n\n" +
+		"Exiting game...");
+		setButtonsText (new string[] { "", "", "", "" });
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
+
+		if (slider.value <= 0) {
+			currentMenu = exitGame;
+		} else {
+			currentMenu = fatalErrorNotification;
+		}
+	}
+
 	float currentMultiplayerWaitTime;
 	float timeToWaitUntilRandomAI;
 
-	void multiPlayerQuickPlayStartGame ()
+	public void multiPlayerQuickPlayStartGame ()
 	{
+		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
+
 		currentMultiplayerWaitTime = 0;
 		// If we wait for 30-60 seconds with no opponent, we'll play with a random AI
 		timeToWaitUntilRandomAI = 30 + UnityEngine.Random.Range (0, 30);
 		currentMenu = multiPlayerQuickPlayWaitForGame;
 	}
 
-	// TODO: Add server-based multiplayer here
-	void multiPlayerQuickPlayWaitForGame ()
+	public void multiPlayerQuickPlayWaitForGame ()
 	{
 		setButtonsText (new string[] { "",
 			"", 
@@ -680,7 +743,7 @@ public class UIManager : MonoBehaviour
 			noMenu,
 			noMenu,
 			noMenu,
-			multiPlayerQuickPlay
+			closeNetworkingThenMultiPlayerQuickPlay
 		});
 
 		currentMultiplayerWaitTime += Time.deltaTime;
@@ -712,10 +775,72 @@ public class UIManager : MonoBehaviour
 			gameLogic.computer.level = UnityEngine.Random.Range (0, 9);
 			gameLogic.computer.updateSpeedAndDifficulty ();
 			gameLogic.gameMode = "Multiplayer Quick Play";
-			Debug.Log (gameLogic.computer.getLevelString ());
+//			Debug.Log (gameLogic.computer.getLevelString ());
 			currentMenu = startGame;
 		} else {
 			currentMenu = proceedToAIGame;
+		}
+	}
+
+	// Called by NetworkGameState once client connects
+	public void proceedToMultiplayerGame ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Found an Opponent!\n\n" +
+		"Setting up game...");
+
+		if (slider.value <= 0) {
+			gameLogic.gameMode = "Multiplayer Quick Play";
+			currentMenu = multiplayerSetupNextRound;
+		} else {
+			currentMenu = proceedToMultiplayerGame;
+		}
+	}
+
+	void multiplayerSetupNextRound ()
+	{
+		game.resetNetworkedAnswers ();
+
+		if (gameLogic.isServer) {
+			game.nextRound ();
+
+			Question currentQuestion = game.currentTriviaRound.currentQuestion;
+
+			NetworkGameState network = gameLogic.ourGamestate;
+
+			network.RpcUpdateQuestion (currentQuestion.questionText);
+			network.RpcUpdateAnswer1 (currentQuestion.correctAnswer);
+			network.RpcUpdateAnswer2 (currentQuestion.incorrectAnswers [0]);
+			network.RpcUpdateAnswer3 (currentQuestion.incorrectAnswers [1]);
+			network.RpcUpdateAnswer4 (currentQuestion.incorrectAnswers [2]);
+			network.RpcUpdateRoundNumber (game.currentTriviaRound.round);
+		}
+
+		slider.value = 2;
+		currentMenu = multiplayerNextRoundSyncTime;
+	}
+
+	void multiplayerNextRoundSyncTime ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
+
+		setButtonsText (new String[] { "", "", "", "" });
+
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		setDisplayText ("Syncing next round...");
+
+		if (slider.value <= 0) {
+			currentMenu = continueGame;
+		} else {
+			currentMenu = multiplayerNextRoundSyncTime;
 		}
 	}
 
@@ -794,13 +919,13 @@ public class UIManager : MonoBehaviour
 			currentMenu = startGame;
 		}
 	}
-		
+
 	void leaderboardLoad ()
 	{
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		Scores = "Loading Scores";
-		StartCoroutine(GetScores());
+		StartCoroutine (GetScores ());
 		currentMenu = leaderboard;
 	}
 
@@ -817,37 +942,34 @@ public class UIManager : MonoBehaviour
 			noMenu,
 			multiPlayerOneManArmy
 		});
-		setDisplayText(Scores);
+		setDisplayText (Scores);
 	}
 
-	IEnumerator PostScores(string name, int score)
+	IEnumerator PostScores (string name, int score)
 	{ 
 
 		string post_url = addScoreURL + "name=" + WWW.EscapeURL (name) + "&score=" + score;
 
-		WWW hs_post = new WWW(post_url);
+		WWW hs_post = new WWW (post_url);
 		yield return hs_post;
 
-		if (hs_post.error != null)
-		{
+		if (hs_post.error != null) {
 			Scores = "There was an error posting the high score: " + hs_post.error;
 		}
 	}
 
-	IEnumerator GetScores()
+	IEnumerator GetScores ()
 	{
-		WWW hs_get = new WWW(highscoreURL);
+		WWW hs_get = new WWW (highscoreURL);
 		yield return hs_get;
 
-		if (hs_get.error != null) 
-		{
+		if (hs_get.error != null) {
 			Scores = "There was an error getting the high score board: " + hs_get.error;
-		} 
-		else
-		{
+		} else {
 			Scores = hs_get.text;
 		} 
 	}
+
 	void changeQuestions ()
 	{
 		setButtonsText (new string[] { "<<< SELECT QUESTION SET >>>",
@@ -990,7 +1112,20 @@ public class UIManager : MonoBehaviour
 
 	void continueGame ()
 	{
-		game.nextRound ();
+		if (gameLogic.currentlyNetworking ()) {
+			if (!gameLogic.isServer) {
+				NetworkGameState network = gameLogic.theirGamestate;
+
+				game.networkedNextRound (network.questionText, network.answer1, network.answer2, network.answer3, network.answer4);
+
+				if (game.currentTriviaRound.round != gameLogic.theirGamestate.roundNumber) {
+					// TODO: Exit game here
+					Debug.Log ("DESYNC -- LOST INTERNET");
+				}
+			}
+		} else {
+			game.nextRound ();
+		}
 		currentMenu = triviaRound;
 	}
 
@@ -1007,6 +1142,10 @@ public class UIManager : MonoBehaviour
 			gameLogic.displayText += "YOU WIN!\n\n";
 		}
 
+		if (gameLogic.currentlyNetworking ()) {
+			gameLogic.closeAllNetworking ();
+		}
+
 		// Restore ability to drag objects around for later games
 		objects [0].GetComponent<Draggable> ().draggingEnabled = true;
 		objects [1].GetComponent<Draggable> ().draggingEnabled = true;
@@ -1016,8 +1155,8 @@ public class UIManager : MonoBehaviour
 		// Reset game mode
 		gameLogic.gameMode = "";
 
-		StartCoroutine(PostScores(gameLogic.username, gameLogic.reputation));
-		setDisplayText(Scores);
+		StartCoroutine (PostScores (gameLogic.username, gameLogic.reputation));
+		setDisplayText (Scores);
 		currentMenu = endGameScreen;
 	}
 
@@ -1076,12 +1215,19 @@ public class UIManager : MonoBehaviour
 
 			RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
 			gameLogic.randomlyPlaceStar (bounds, objects);
-			gameLogic.computer.placeBlock (game.currentTriviaRound.playerAttacks (computer), bounds, objects);
+
+			if (!gameLogic.currentlyNetworking ()) {
+				gameLogic.computer.placeBlock (game.currentTriviaRound.playerAttacks (computer), bounds, objects);
+			}
 
 			currentMenu = combatRound;
 
 			if (game.currentTriviaRound.skipCombat (computer)) {
-				currentMenu = continueGame;
+				if (gameLogic.currentlyNetworking ()) {
+					currentMenu = multiplayerSetupNextRound;
+				} else {
+					currentMenu = continueGame;
+				}
 			}
 		}
 	}
@@ -1119,8 +1265,6 @@ public class UIManager : MonoBehaviour
 
 		if (game.currentCombatRound.calculateDamage) {
 
-			objectVisibility (true, true, true);
-
 			// This calculates damageDealt, damageBlocked
 			game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
 
@@ -1130,8 +1274,51 @@ public class UIManager : MonoBehaviour
 				game.dealDamage (damageDealt - damageBlocked, 0);
 			}
 
+			if (gameLogic.currentlyNetworking ()) {
+				if (gameLogic.isServer) {
+					gameLogic.theirGamestate.RpcUpdateClientHealth (game.enemyHealth);
+					gameLogic.theirGamestate.RpcUpdateServerHealth (game.playerHealth);
+
+					gameLogic.theirGamestate.RpcUpdateDamageDealt (damageDealt);
+					gameLogic.theirGamestate.RpcUpdateDamageBlocked (damageBlocked);
+				}
+
+				slider.value = 2;
+				currentMenu = multiplayerCombatResultsSyncTime;
+			} else {
+				slider.value = game.roundTime / 2;
+				objectVisibility (true, true, true);
+				currentMenu = combatResults;
+			}
+		}
+	}
+
+	void multiplayerCombatResultsSyncTime ()
+	{
+		slider.value -= Time.deltaTime;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+
+		// Make the sword and shield uninteractable at this point
+		objects [0].GetComponent<Draggable> ().draggingEnabled = false;
+		objects [1].GetComponent<Draggable> ().draggingEnabled = false;
+
+		setButtonsText (new string[] { "Syncing results",
+			"Syncing results",
+			"Syncing results",
+			"Syncing results"
+		});
+
+		if (slider.value <= 0) {
+			if (gameLogic.currentlyNetworking () && !gameLogic.isServer) {
+				game.playerHealth = gameLogic.ourGamestate.clientHealth;
+				game.enemyHealth = gameLogic.ourGamestate.serverHealth;
+
+				damageDealt = gameLogic.ourGamestate.damageDealt;
+				damageBlocked = gameLogic.ourGamestate.damageBlocked;
+			}
+
 			slider.value = game.roundTime / 2;
-			slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+			objectVisibility (true, true, true);
 			currentMenu = combatResults;
 		}
 	}
@@ -1163,7 +1350,11 @@ public class UIManager : MonoBehaviour
 			objects [0].GetComponent<Draggable> ().draggingEnabled = true;
 			objects [1].GetComponent<Draggable> ().draggingEnabled = true;
 
-			currentMenu = continueGame;
+			if (gameLogic.currentlyNetworking ()) {
+				currentMenu = multiplayerSetupNextRound;
+			} else {
+				currentMenu = continueGame;
+			}
 		}
 	}
 

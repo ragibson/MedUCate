@@ -6,21 +6,25 @@ public class TriviaRound
 {
 	public float roundTime;
 
-	private Question currentQuestion;
+	public Question currentQuestion;
 
 	public string[] answers;
 	private string correctAnswer;
 
-	private float answerTime;
+	public float answerTime;
 	public bool correct = false;
 
-	private int round;
+	public int round;
 	private float currentTime = 0;
 
 	public bool proceedToCombat = false;
 
+	GameLogicManager gameLogic;
+
 	public TriviaRound (float secondsPerRound, Question question, string[] responses, string correctResponse, int roundNumber)
 	{
+		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
+
 		roundTime = secondsPerRound;
 		currentQuestion = question;
 		answers = responses;
@@ -38,16 +42,28 @@ public class TriviaRound
 
 	public void Update ()
 	{
+		if (gameLogic.currentlyNetworking ()) {
+			gameLogic.computer.networkedUpdateTimeAndAnswer (gameLogic.networkedTheirAnswerTime (), gameLogic.networkedTheirAnswerCorrect ());
+		}
+
+		bool slowAnswer = (answerTime != roundTime && answerTime >= (roundTime - 3));
+		bool noAnswer = (answerTime == roundTime);
+
+		// If networked, also consider the opponent's answer time
+		if (gameLogic.currentlyNetworking ()) {
+			slowAnswer |= (gameLogic.computer.answerTime != roundTime && gameLogic.computer.answerTime >= (roundTime - 3));
+			noAnswer |= (gameLogic.computer.answerTime == roundTime);
+		}
+
 		currentTime += Time.deltaTime;
-		if (timeRemaining () < 3 && answerTime != roundTime &&
-		    answerTime >= (roundTime - 3) && !addedExtraTime) {
+		if (timeRemaining () < 3 && slowAnswer && !addedExtraTime) {
 			/*
 			 * 	If the player answers with less than three seconds to go, we give 
 			 * 	them some extra time to read the results of the round
 			 */
 			addedExtraTime = true;
 			currentTime = roundTime - 3;
-		} else if (timeRemaining () < 0 && answerTime == roundTime && !addedExtraTime) {
+		} else if (timeRemaining () < 0 && noAnswer && !addedExtraTime) {
 			/*
 			 * 	If the player does not answer at all, we also give them some extra
 			 * 	time to read the results of the round
@@ -113,11 +129,23 @@ public class TriviaRound
 		string computerAnswerTimeText = string.Format ("YOUR OPPONENT ANSWERED {0}\n" +
 		                                "IN {1} SECONDS\n\n", computerChoice, computerTime);
 
+		if (gameLogic.currentlyNetworking ()) {
+			if (computer.answerTime == roundTime) {
+				if (!addedExtraTime) {
+					computerAnswerTimeText = "YOUR OPPONENT HAS NOT ANSWERED YET\n\n";
+					actionText = "";
+				} else {
+					computerAnswerTimeText = "YOUR OPPONENT DID NOT ANSWER\n\n";
+				}
+			}
+		} else {
+			if (computerTime == roundTime) {
+				computerAnswerTimeText = "YOUR OPPONENT DID NOT ANSWER\n\n";
+			}
+		}
+
 		if (answerTime == roundTime) {
 			playerAnswerTimeText = "YOU DID NOT ANSWER\n\n";
-		}
-		if (computerTime == roundTime) {
-			computerAnswerTimeText = "YOUR OPPONENT DID NOT ANSWER\n\n";
 		}
 
 		return string.Format ("THE ANSWER WAS\n\n" +

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class GameLogicManager : MonoBehaviour
 {
@@ -55,6 +56,11 @@ public class GameLogicManager : MonoBehaviour
 	public string gameMode = "";
 	public int[] campaignScores;
 
+	// === Multiplayer === //
+	public bool isServer = false;
+	public NetworkGameState ourGamestate;
+	public NetworkGameState theirGamestate;
+
 	public Queue<String> setsToAdd = new Queue<String> ();
 
 	// Initialization
@@ -71,7 +77,16 @@ public class GameLogicManager : MonoBehaviour
 			UIManager UI = GameObject.Find ("UI").GetComponent<UIManager> ();
 			UI.currentMenu = UI.debugWipeAllSettings;
 		}
+	}
 
+	private void Awake ()
+	{
+		Application.logMessageReceived += handleUnityLog;
+	}
+
+	void handleUnityLog (string logString, string stackTrace, LogType type)
+	{
+		GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
 	}
 
 	// Handles the retrieval of question sets with timeout
@@ -439,6 +454,53 @@ public class GameLogicManager : MonoBehaviour
 		return str.ToArray ();
 	}
 
+	public bool networkedTheirAnswerCorrect ()
+	{
+		if (this.isServer) {
+			return theirGamestate.clientAnswerCorrect;
+		} else {
+			return theirGamestate.serverAnswerCorrect;
+		}
+	}
+
+	public bool networkedOurAnswerCorrect ()
+	{
+		if (this.isServer) {
+			return ourGamestate.serverAnswerCorrect;
+		} else {
+			return ourGamestate.clientAnswerCorrect;
+		}
+	}
+
+	public float networkedTheirAnswerTime ()
+	{
+		if (this.isServer) {
+			return theirGamestate.clientAnswerTime;
+		} else {
+			return theirGamestate.serverAnswerTime;
+		}
+	}
+
+	public float networkedOurAnswerTime ()
+	{
+		if (this.isServer) {
+			return ourGamestate.serverAnswerTime;
+		} else {
+			return ourGamestate.clientAnswerTime;
+		}
+	}
+
+	public bool currentlyNetworking ()
+	{
+		return ourGamestate != null && theirGamestate != null;
+	}
+
+	public void closeAllNetworking ()
+	{
+		GameObject.Find ("Network Manager").GetComponent<NetworkManager> ().StopHost ();
+		ourGamestate = null;
+		theirGamestate = null;
+	}
 
 	// ===   THE FOLLOWING METHODS ARE ALL SETTING   === //
 	// === MANIPULATION FROM THE VARIOUS GAME MENUS  === //

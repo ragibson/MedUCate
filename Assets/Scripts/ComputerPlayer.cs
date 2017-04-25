@@ -95,7 +95,8 @@ public class ComputerPlayer
 		return speeds [speed];
 	}
 
-	public void updateSpeedAndDifficulty() {
+	public void updateSpeedAndDifficulty ()
+	{
 		difficulty = level / difficulties.Length;
 		speed = level % speeds.Length;
 	}
@@ -231,4 +232,11 @@ public class ComputerPlayer
 		correctAnswer = answeredCorrectly ();
 		answerTime = timeToAnswer ();
 	}
+
+	public void networkedUpdateTimeAndAnswer (float time, bool correct)
+	{
+		correctAnswer = correct;
+		answerTime = time;
+	}
+
 }
