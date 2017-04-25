@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="MeducateTitleBar">
+        <h1>Meducate</h1>
+    </div>
+
+    <div class="topnav">
+        <a href="index.html">Home</a>
+        <a class="active" href="#addQuestions">Add Questions</a>
+        <a href="#contact">Contact</a>
+        <a href="#about">About</a>
+
+    </div>
+
+    <div class="mainDisplay">
+        <div class="pageContents">
+            <h2>You have reached the "Add Question" section of our website.</h2>
+            <p>This page contains our upload center and a tutorial on how to use our *FREE* Excel question creation <a href="TemplateSheet.xlsm" download>tool available here for download</a>.
+                <br>The file will be named "QuestionsToAdd.csv" and will be found in "C:\CSVToAdd" (NOTE: this directory must be created prior to running our tool)
+                <br>Please check below for a tutorial on how to use <a href="TemplateSheet.xlsm" download> our free Excel question creation tool</a>
+            </p>
+        </div>
+        <div class="uploadSection">
+
+            <div id="UploadCenterBar">
+                <h2>Upload Center</h2>
+            </div>
+
+            <div id="UploadCenter">
+                <p>
+                    If you have already used our tool, and have your questions prepared, please click on the button below and navigate to the file on your system.
+                </p>
+                <form method="POST" enctype="multipart/form-data" action="upload.php">
+                    <input type="file" name="fileToUpload">
+                    <input type="submit" name="submit" value="Upload Now">
+                </form>
+                </br>
+            </div>
+        </div>
+
+        <div class="ExcelQuestionTutorial">
+            <div id="ExcelTutorialBar">
+                <h2><i>Tutorial:</i> Excel Question Creation Tool</h2>
+            </div>
+            <div id="ExcelTutorialContents">
+                <p>
+                    <i><b>Coming soon: Tutorial for using Excel Template Tool</b></i>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
