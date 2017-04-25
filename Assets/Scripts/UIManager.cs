@@ -6,8 +6,8 @@ using System;
 public class UIManager : MonoBehaviour
 {
 
-	public string addScoreURL = "meducate.cs.unc.edu/addscore.php?";
-	public string highscoreURL = "meducate.cs.unc.edu/display.php";
+	public string addScoreURL = "http://meducate.cs.unc.edu/addscore.php";
+	public string highscoreURL = "http://meducate.cs.unc.edu/display.php";
 	public string Scores;
 
 	private Settings settings;
@@ -1010,7 +1010,7 @@ public class UIManager : MonoBehaviour
 	IEnumerator PostScores (string name, int score)
 	{ 
 
-		string post_url = addScoreURL + "name=" + WWW.EscapeURL (name) + "&score=" + score;
+		string post_url = addScoreURL + "?name=" + WWW.EscapeURL (name) + "&score=" + score;
 
 		WWW hs_post = new WWW (post_url);
 		yield return hs_post;
