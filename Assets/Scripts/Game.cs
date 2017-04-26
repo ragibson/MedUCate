@@ -31,6 +31,10 @@ public class Game
 
 	private int round = 1;
 
+	/*
+	 * 	We use a question queue so that questions do not repeat
+	 * 	until the entire question set has been exhausted.
+	 */
 	public void fillQuestionQueue (QuestionSet currentSet)
 	{
 		List<int> questionIds = new List<int> ();
@@ -38,6 +42,7 @@ public class Game
 			questionIds.Add (i);
 		}
 
+		// Shuffle the questions
 		for (int i = 0; i < questionIds.Count; i++) {
 			int temp = questionIds [i];
 			int randomIndex = Random.Range (i, questionIds.Count);
@@ -50,6 +55,11 @@ public class Game
 		}
 	}
 
+	/*
+	 * 	Sets up the next round.
+	 * 
+	 * 	If playing multiplayer, this is only run by the server.
+	 */
 	public void nextRound ()
 	{
 		QuestionSet currentSet = gameLogic.settings.selected;
@@ -70,6 +80,12 @@ public class Game
 		round += 1;
 	}
 
+	/*
+	 * 	If playing multiplayer, this is run by the client
+	 * 	and uses the server's question/answer values.
+	 * 
+	 * 	Called in continueGame in UIManager
+	 */
 	public void networkedNextRound (string q, string a1, string a2, string a3, string a4)
 	{
 		Question currentQuestion = new Question (q, a1, a2, a3, a4);

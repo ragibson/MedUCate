@@ -5,6 +5,12 @@ using UnityEngine.Networking.Match;
 
 public class MatchMaking : MonoBehaviour
 {
+	/*
+	 * 	We will only show up to 10 rooms since this is our limit with free Unity matchmaking.
+	 * 
+	 * 	Should be increased if the multiplayer subscription is changed or the matchmaking
+	 * 	utilities are installed on the server instead.
+	 */
 	public int maxRooms = 10;
 	public bool joiningGame = false;
 
@@ -37,6 +43,7 @@ public class MatchMaking : MonoBehaviour
 		manager.matchMaker.ListMatches (0, maxRooms, "", true, 0, 0, OnMatchList);
 	}
 
+	// Called when listMatches() is run
 	public void OnMatchList (bool success, string extendedInfo, List<MatchInfoSnapshot> matches)
 	{
 		if (matches == null) {

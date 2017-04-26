@@ -40,6 +40,9 @@ public class ComputerPlayer
 	 * 	is just a mix of the difficulty and
 	 * 	speed from above.
 	 * 
+	 * 	difficulty = level / difficulties.Length;
+	 * 	speed = level % speeds.Length;
+	 * 
 	 * 	E.g.
 	 * 		"Level: Medium/Fast"
 	 * 		from the original prototype
@@ -74,13 +77,7 @@ public class ComputerPlayer
 
 	public void decreaseLevel ()
 	{
-		/*
-		 * 	This is equivalent to subtracting 1 modulo
-		 * 	difficulties.Length * speeds.Length
-		 * 
-		 * 	This is just since modulo of negative numbers
-		 * 	does not behave as needed.
-		 */
+		//	This is equivalent to subtracting 1 modulo Length
 		level += difficulties.Length * speeds.Length - 1;
 		level %= difficulties.Length * speeds.Length;
 	}
@@ -112,6 +109,9 @@ public class ComputerPlayer
 		return difficulties.Length * speeds.Length;
 	}
 
+	// ===   THE FOLLOWING METHODS HANDLE   === //
+	// ===         ACTUAL GAME LOGIC        === //
+
 	/*
 	 * 	Calculates the ComputerPlayer's block movement
 	 * 
@@ -130,8 +130,8 @@ public class ComputerPlayer
 	 * 	params:
 	 * 		wonTrivia:	true if the ComputerPlayer lost the trivia round
 	 * 					false otherwise
-	 * 		objects: [Sword, Shield, Star]
-	 * 		bounds: The RectTransform of the play area
+	 * 		objects: 	[Sword, Shield, Star]
+	 * 		bounds: 	The RectTransform of the play area
 	 */
 	public void placeBlock (bool lostTrivia, RectTransform bounds, GameObject[] objects)
 	{
@@ -168,6 +168,9 @@ public class ComputerPlayer
 
 	/*
 	 * 	Places the sword within 50% of the star block for the tutorial
+	 * 
+	 * 	This is greater than in usual play to make it easier for new
+	 * 	players to see the star block underneath the sword block
 	 */
 	public void placeBlockTutorial (RectTransform bounds, GameObject[] objects)
 	{
@@ -227,12 +230,19 @@ public class ComputerPlayer
 		}
 	}
 
+	// Update opponent's answer and time when using AI
 	public void updateTimeAndAnswer ()
 	{
 		correctAnswer = answeredCorrectly ();
 		answerTime = timeToAnswer ();
 	}
 
+	/*
+	 *	Update opponent's answer and time when playing multiplayer
+	 *
+	 *	We essentially consider the other player to be a "computer"
+	 *	so that the same game logic code will work in both cases.
+	 */
 	public void networkedUpdateTimeAndAnswer (float time, bool correct)
 	{
 		correctAnswer = correct;

@@ -42,18 +42,29 @@ public class TriviaRound
 
 	public void Update ()
 	{
+		/*
+		 *	Update opponent's answer and time when playing multiplayer
+		 *
+		 *	We essentially consider the other player to be a "computer"
+		 *	so that the same game logic code will work in both cases.
+		 */
 		if (gameLogic.currentlyNetworking ()) {
 			gameLogic.computer.networkedUpdateTimeAndAnswer (gameLogic.networkedTheirAnswerTime (),
 				gameLogic.networkedTheirAnswerCorrect ());
 		}
 
+		/*
+		 * 	Determine whether we were slow to answer (less than 3 seconds left)
+		 *  or didn't answer the current question.
+		 */
 		bool slowAnswer = (answerTime != roundTime && answerTime >= (roundTime - 3));
 		bool noAnswer = (answerTime == roundTime);
 
-		// If networked, also consider the opponent's answer time
+		// If networked, also consider the opponent's answer time.
 		if (gameLogic.currentlyNetworking ()) {
 			slowAnswer |= (gameLogic.computer.answerTime != roundTime &&
 			gameLogic.computer.answerTime >= (roundTime - 3));
+			
 			noAnswer |= (gameLogic.computer.answerTime == roundTime);
 		}
 
@@ -77,6 +88,7 @@ public class TriviaRound
 		}
 	}
 
+	// returns true if we've answered the question or ran out of time
 	public bool answered ()
 	{
 		return answerTime < roundTime || addedExtraTime;

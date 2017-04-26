@@ -8,20 +8,18 @@ using UnityEngine.Networking;
 public class GameLogicManager : MonoBehaviour
 {
 
-	/*
-	 *	In initial prototype, these were set to 200, 10, and 25, respectively.
-	 *
-	 *	Should consider shortening game length by changing these.
-	 */
+	// Game options set in Unity editor.
 	public int gameHP;
 	public int secondsPerRound;
 	public int damagePerAttack;
 
+	// Will wipe all saved user data if checked in the Unity editor.
 	public bool debugDeleteAllSettings;
 
 	public bool completedTutorial;
 	public int reputation;
 
+	// Primary display text for use in UIManager
 	public string displayText = "";
 
 	public string username = "NEW USER";
@@ -34,10 +32,12 @@ public class GameLogicManager : MonoBehaviour
 	// The input field for the "Add Questions" menu
 	public GameObject inputfield;
 
+	// Question set requests will time out after 10 seconds
 	public float serverTimeout = 10;
 	public float timeLeftToWaitForServer = 0;
 	public Queue<String> setsToAdd = new Queue<String> ();
 
+	// Game rounds will wait 1 second for data to properly sync
 	public float gameSyncTime = 1;
 
 	WWW setWWW = null;
@@ -69,11 +69,12 @@ public class GameLogicManager : MonoBehaviour
 	{
 		matchMaker = GameObject.Find ("Network Manager").GetComponent<MatchMaking> ();
 
-		// Get default question sets
+		// Get default question sets from server
 		foreach (String s in new String[] { "mental", "physical", "social", "nutritional" }) {
 			setsToAdd.Enqueue ("default_" + s + "_health_set");
 		}
 
+		// Use the server to update the user's other question sets
 		String[] setNames = PlayerPrefs.GetString ("Question Set Names").Split ('_');
 		foreach (string s in setNames) {
 			string setName = s.Replace (' ', '_').ToLower ();
@@ -82,6 +83,7 @@ public class GameLogicManager : MonoBehaviour
 			}
 		}
 
+		// Get saved user data from device
 		getPlayerPrefs ();
 
 		if (debugDeleteAllSettings) {
@@ -95,6 +97,11 @@ public class GameLogicManager : MonoBehaviour
 		Application.logMessageReceived += handleUnityLog;
 	}
 
+	/*
+	 * 	If we ever hit an error or exception, we proceed to the fatalError() menu (see UIManager).
+	 * 
+	 * 	This is primarily used to handle disconnects in multiplayer.
+	 */
 	void handleUnityLog (string logString, string stackTrace, LogType type)
 	{
 		if (type.ToString ().Equals ("Exception") || type.ToString ().Equals ("Error")) {
@@ -108,10 +115,12 @@ public class GameLogicManager : MonoBehaviour
 		if (timeLeftToWaitForServer > 0 && setWWW != null && setsToAdd.Count > 0) {
 			timeLeftToWaitForServer -= Time.deltaTime;
 
+			// If the server responded with an error, we skip this set
 			if (!String.IsNullOrEmpty (setWWW.error)) {
 				timeLeftToWaitForServer = 0;
 			}
 
+			// Parse the requested .csv file and add the Question Set to the game
 			if (setWWW.isDone) {
 				List<Question> questionsToAdd = new List<Question> ();
 
@@ -128,16 +137,18 @@ public class GameLogicManager : MonoBehaviour
 					}
 				}
 
+				// Make sure the set name is stored in all lowercase with underscores instead of spaces
 				String setName = setNameToRetrieve.Replace ("_", " ").ToLower ();
 
 				addQuestionSet (new QuestionSet (questionsToAdd.ToArray (), setName, author));
 
+				// Prepare for next Question Set to retrieve, if necessary.
 				setWWW = null;
 				timeLeftToWaitForServer = 0;
 				setsToAdd.Dequeue ();
 			}
 		} else {
-			// If we've actually timed out, we request no more sets
+			// If we've actually timed out, we request no more sets since the server is apparently unavailable
 			if (timeLeftToWaitForServer < 0) {
 				setsToAdd.Clear ();
 			}
@@ -146,6 +157,12 @@ public class GameLogicManager : MonoBehaviour
 			if (setsToAdd.Count != 0) {
 				retrieveSetFromServer (setsToAdd.Peek ());
 			} else {
+				/*
+				 * 	Placeholder question set if the user has none.
+				 * 
+				 * 	This should only occur if they start the game for the first time
+				 * 	with no internet (or server) access.
+				 */
 				if (questionSets.Count == 0) {
 					addQuestionSet (new QuestionSet (
 						new Question[]{ new Question ("You have no Question Sets", "", "", "", "") },
@@ -153,6 +170,7 @@ public class GameLogicManager : MonoBehaviour
 						"N/A"));
 				}
 
+				// Update saved user data and declare setup complete
 				if (!initialSetupComplete) {
 					updatePlayerPrefs ();
 					getPlayerPrefs ();
@@ -161,16 +179,25 @@ public class GameLogicManager : MonoBehaviour
 			}
 		}
 
+		// If playing multiplayer, tell the other player we're still connected
 		if (currentlyNetworking ()) {
 			ourGamestate.CmdUpdateTimeSinceLastSync (0);
 		}
 
+		// If playing multiplayer and lose connection, we proceed to the fatalError() menu (see UIManager).
 		if (String.Equals (gameMode, "Multiplayer Quick Play") && !currentlyNetworking ()) {
 			GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
 		}
 	}
 
-	// Returns true if we've waited two seconds or longer for a question set request
+	/*
+	 * 	Returns true if we've waited two seconds or longer for a question set request
+	 * 
+	 * 	We use this to warn the user that they may not have internet access before
+	 * 	proceeding to use the question sets from the user's device.
+	 * 
+	 * 	See connectingToServer() in UIManager.
+	 */
 	public bool serverSlowToRespond ()
 	{
 		return timeLeftToWaitForServer != 0 && (timeLeftToWaitForServer < serverTimeout - 2);
@@ -182,6 +209,7 @@ public class GameLogicManager : MonoBehaviour
 			return false;
 		}
 
+		// If we are adding a question set and have none, we remove the placeholder Question Set
 		for (int i = 0; i < questionSets.Count; i++) {
 			if (String.Equals (questionSets [i].setName.ToLower (), "No Question Sets".ToLower ())) {
 				questionSets.RemoveAt (i);
@@ -189,8 +217,12 @@ public class GameLogicManager : MonoBehaviour
 		}
 
 		for (int i = 0; i < questionSets.Count; i++) {
-
-			// If this matches a set name we have, update the old set
+			/*
+			 * 	If this matches a set name we have, update the old set.
+			 * 
+			 * 	This is particularly useful for propagating Question Set changes
+			 * 	from the server to all players.
+			 */
 			if (String.Equals (questionSets [i].setName, setToAdd.setName)) {
 				questionSets [i] = setToAdd;
 				return true;
@@ -209,13 +241,13 @@ public class GameLogicManager : MonoBehaviour
 		return String.Format ("HIGH SCORE: {0}/{1}", campaignScores [level], gameHP);
 	}
 
-	// Returns whether player got a high score
+	// Returns whether player got a high score and updates user scores/data
 	public bool updateCampaign (float finalHP)
 	{
 		if (String.Equals (this.gameMode, "Campaign")) {
 			int score = (int)Mathf.Round (finalHP);
 
-			// If the player gets a new high score, we update their scores and reputation
+			// If the player gets a new high score, we update their scores and saved data
 			if (score > this.campaignScores [computer.level]) {
 				this.campaignScores [computer.level] = score;
 				updatePlayerPrefs ();
@@ -226,7 +258,7 @@ public class GameLogicManager : MonoBehaviour
 		return false;
 	}
 
-	// Saves settings to file
+	// Saves settings to the user's device
 	public void updatePlayerPrefs ()
 	{
 		PlayerPrefs.SetString ("Username", username);
@@ -245,7 +277,7 @@ public class GameLogicManager : MonoBehaviour
 		PlayerPrefs.Save ();
 	}
 
-	// Reads settings from file
+	// Reads settings from the user's device
 	public void getPlayerPrefs ()
 	{
 		username = PlayerPrefs.GetString ("Username");
@@ -267,6 +299,7 @@ public class GameLogicManager : MonoBehaviour
 		setCurrentSet (selectedSet);
 	}
 
+	// Used if debugDeleteAllSettings is true
 	public void deleteAllPrefs ()
 	{
 		PlayerPrefs.DeleteAll ();
@@ -295,7 +328,7 @@ public class GameLogicManager : MonoBehaviour
 		String[] setNames = PlayerPrefs.GetString ("Question Set Names").Split ('_');
 		foreach (String s in setNames) {
 			if (!String.Equals (s, "")) {
-				
+
 				int numQuestions = PlayerPrefs.GetInt (s + "_numQuestions");
 
 				List<Question> questions = new List<Question> ();
@@ -321,7 +354,7 @@ public class GameLogicManager : MonoBehaviour
 		}
 	}
 
-	// Saves all of our question sets to the device using PlayerPrefs
+	// Saves all of our question sets to the device and the list of question set names for later retrieval.
 	public void saveAllQuestionSetsToDevice ()
 	{
 		String setNames = "";
@@ -332,7 +365,7 @@ public class GameLogicManager : MonoBehaviour
 		PlayerPrefs.SetString ("Question Set Names", setNames);
 	}
 
-	// Saves a question set to the device using PlayerPrefs
+	// Saves a single question set to the user's device.
 	public void saveQuestionSetToDevice (QuestionSet setToSave)
 	{
 		PlayerPrefs.SetInt (setToSave.setName + "_numQuestions", setToSave.numberOfQuestions ());
@@ -435,7 +468,6 @@ public class GameLogicManager : MonoBehaviour
 	 * 		lineData:	a String[] holding a line of the CSV to parse
 	 * 
 	 * 	returns true if the line contains only a question number
-	 * 
 	 * 	returns false if the line contains question text and answers
 	 */
 	bool lineIsNotQuestion (String[] lineData)
@@ -457,6 +489,7 @@ public class GameLogicManager : MonoBehaviour
 		return true;
 	}
 
+	// Splits a csv line, handling quotes and commas
 	String[] SplitCSVLine (String s)
 	{
 		int i;
@@ -480,6 +513,7 @@ public class GameLogicManager : MonoBehaviour
 		return str.ToArray ();
 	}
 
+	// In multiplayer, returns whether the opponent got the answer correct
 	public bool networkedTheirAnswerCorrect ()
 	{
 		if (this.isServer) {
@@ -489,6 +523,7 @@ public class GameLogicManager : MonoBehaviour
 		}
 	}
 
+	// In multiplayer, returns whether we got the answer correct
 	public bool networkedOurAnswerCorrect ()
 	{
 		if (this.isServer) {
@@ -498,6 +533,7 @@ public class GameLogicManager : MonoBehaviour
 		}
 	}
 
+	// In multiplayer, returns the opponent's answer time
 	public float networkedTheirAnswerTime ()
 	{
 		if (this.isServer) {
@@ -507,6 +543,7 @@ public class GameLogicManager : MonoBehaviour
 		}
 	}
 
+	// In multiplayer, returns our answer time
 	public float networkedOurAnswerTime ()
 	{
 		if (this.isServer) {
@@ -516,11 +553,16 @@ public class GameLogicManager : MonoBehaviour
 		}
 	}
 
+	/*
+	 * 	Returns whether we are in a multiplayer match
+	 * 	(and both parties are still connected)
+	 */
 	public bool currentlyNetworking ()
 	{
 		return ourGamestate != null && theirGamestate != null;
 	}
 
+	// Closes all networking interfaces
 	public void closeAllNetworking ()
 	{
 		matchMaker.endMatchMaker ();
@@ -534,6 +576,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void setCurrentSet (int i)
 	{
+		// Placeholder question set safeguard
 		if (questionSets.Count == 0) {
 			if (questionSets.Count == 0) {
 				addQuestionSet (new QuestionSet (
@@ -554,6 +597,7 @@ public class GameLogicManager : MonoBehaviour
 		settings.selected = questionSets [selectedSet];
 		questionSets [selectedSet].selected = true;
 
+		// Make sure to save this change to user's saved data
 		updatePlayerPrefs ();
 	}
 
@@ -564,13 +608,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void decreaseCurrentSet ()
 	{
-		/*
-		 * 	This is equivalent to subtracting 1 modulo
-		 * 	questionSets.Length
-		 * 
-		 * 	This is just since modulo of negative numbers
-		 * 	does not behave as needed.
-		 */
+		//	This is equivalent to subtracting 1 modulo Length
 		setCurrentSet ((selectedSet + questionSets.Count - 1) % questionSets.Count);
 	}
 
@@ -600,6 +638,7 @@ public class GameLogicManager : MonoBehaviour
 
 	public void hideAnswer ()
 	{
+		// XOR toggles the boolean value here
 		hideAnswers ^= true;
 	}
 
@@ -639,6 +678,7 @@ public class GameLogicManager : MonoBehaviour
 		objects [2].transform.position = randomPlacement;
 	}
 
+	// Look at the next multiplayer room (see multiPlayerJoinGame() in UIManager)
 	public void increaseRoomNumber ()
 	{
 		if (matchMaker.roomList != null && matchMaker.roomList.Count > 0) {

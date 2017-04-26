@@ -18,8 +18,8 @@ public class CombatRound
 	public float playerHealth;
 	public float enemyHealth;
 
+	// Triggers for when to calculate damage and proceed to the combat round
 	public bool calculateDamage = false;
-
 	public bool proceedToCombat = false;
 
 	public CombatRound (float secondsPerRound, float defaultDamage, float playerHP, float enemyHP)

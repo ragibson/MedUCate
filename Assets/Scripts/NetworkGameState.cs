@@ -9,6 +9,15 @@ using UnityEngine.Networking;
 public class NetworkGameState : NetworkBehaviour
 {
 
+	/*
+	 * 	In general, RPC methods are remote procedure calls.
+	 * 	These are called by the server and run on the clients.
+	 * 
+	 * 	The Command methods are called from the client and run
+	 * 	on the server (which usually then propagates the results
+	 * 	back to the client).
+	 */
+
 	public UIManager ui;
 
 	[SyncVar (hook = "OnChangeShield")]
@@ -25,6 +34,14 @@ public class NetworkGameState : NetworkBehaviour
 	[SyncVar]
 	public float timeSinceLastSync;
 
+	/*
+	 * 	The authority of an object is which player is allowed
+	 * 	to change the position of that object.
+	 * 
+	 * 	I.e. if clientShieldAuthority is true, the client is
+	 * 	allowed to move the shield and have the result propagate
+	 * 	to both players.
+	 */
 	[SyncVar]
 	public bool clientShieldAuthority;
 	[SyncVar]
@@ -91,16 +108,19 @@ public class NetworkGameState : NetworkBehaviour
 		}
 
 		if (hasAuthority) {
+			// Client and Server game setup
 			ui.multiPlayerQuickPlayStartGame ();
 			ui.multiPlayerQuickPlayWaitForGame ();
 		}
 
 		if (!isServer && hasAuthority) {
+			// Client proceeds to match immediately
 			ui.proceedToMultiplayerGame ();
 		}
 
 		gameStarted = false;
 
+		// Server initially holds all object authority
 		clientShieldAuthority = false;
 		clientSwordAuthority = false;
 		clientStarAuthority = false;
@@ -133,6 +153,7 @@ public class NetworkGameState : NetworkBehaviour
 
 	void OnChangeShield (Vector3 pos)
 	{
+		// If the other player is moving the shield, we accept their position change.
 		if (shield != null && !canUpdateShield ()) {
 			shield.GetComponent<Transform> ().position = shieldPos;
 		}
@@ -157,6 +178,7 @@ public class NetworkGameState : NetworkBehaviour
 
 	void OnChangeSword (Vector3 pos)
 	{
+		// If the other player is moving the sword, we accept their position change.
 		if (sword != null && !canUpdateSword ()) {
 			sword.GetComponent<Transform> ().position = swordPos;
 		}
@@ -181,6 +203,11 @@ public class NetworkGameState : NetworkBehaviour
 
 	void OnChangeStar (Vector3 pos)
 	{
+		/*
+		 * 	If the other player is moving the star, we accept their position change.
+		 * 
+		 * 	Currently, the server should always have authority over the star.
+		 */
 		if (star != null && !canUpdateStar ()) {
 			star.GetComponent<Transform> ().position = starPos;
 		}
@@ -347,20 +374,30 @@ public class NetworkGameState : NetworkBehaviour
 		if (gameLogic.currentlyNetworking ()) {
 			timeSinceLastSync += Time.deltaTime;
 
+			/*
+			 * 	If we haven't heard from the other player in five seconds, we assume
+			 * 	they've disconnected and proceed to the fatalError() menu (see UIManager).
+			 */
 			if (timeSinceLastSync > 5) {
 				ui.fatalError ();
 			}
 		}
 
+		// Only the local player runs the methods after this.
 		if (!isLocalPlayer) {
 			return;
 		}
 
+		// Server proceeds to game once client connects.
 		if (!gameStarted && isServer && NetworkServer.connections.Count == 2) {
 			gameStarted = true;
 			ui.proceedToMultiplayerGame ();
 		}
 
+		/*
+		 * 	The player with authority over the shield, sword, and star has
+		 * 	their position changes propagated to all other players.
+		 */
 		if (canUpdateShield ()) {
 			CmdShieldPosition (shield.GetComponent<Transform> ().position);
 		}
@@ -373,6 +410,7 @@ public class NetworkGameState : NetworkBehaviour
 			CmdStarPosition (star.GetComponent<Transform> ().position);
 		}
 
+		// If we lose connection to client, proceed to the fatalError() menu (see UIManager).
 		if (gameStarted && isServer && NetworkServer.connections.Count < 2) {
 			ui.fatalError ();
 		}

@@ -41,7 +41,7 @@ public class UIManager : MonoBehaviour
 		objectVisibility (false, false, false);
 	}
 	
-	// Update is called once per frame
+	// The current menu method is called once per frame
 	void Update ()
 	{
 		currentMenu ();
@@ -62,6 +62,10 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+	/*
+	 * 	Propagates the server's understanding of object visibility
+	 * 	and authority to the client.
+	 */
 	void networkedObjectAuthority (bool sword, bool shield, bool star)
 	{
 		if (gameLogic.isServer) {
@@ -129,9 +133,6 @@ public class UIManager : MonoBehaviour
 	{
 		buttonBehaviors = behaviors;
 	}
-
-	// ===== ALL METHODS PAST THIS POINT ARE MENU HANDLERS ===== //
-	// ===== IT'S JUST THE TEXT THAT IS DISPLAYED IN MENUS ===== //
 
 	void mainMenu ()
 	{
@@ -230,12 +231,13 @@ public class UIManager : MonoBehaviour
 		"SHOW ALL THE QUESTIONS FOR THE\n" +
 		"CURRENT QUESTION SET");
 
-		// Make sure the input field for adding questions not being shown
+		// Make sure the input field for adding questions is not being shown
 		gameLogic.inputfield.SetActive (false);
 
 		currentMenu = profile;
 	}
 
+	// This menu also allows the user to change their username
 	void addQuestions ()
 	{
 		setButtonsText (new string[] {
@@ -255,6 +257,7 @@ public class UIManager : MonoBehaviour
 		"You can also change your username here!\n\n" +
 		"Current Username: " + gameLogic.username);
 
+		// Show the input field for adding questions and changing usernames
 		gameLogic.inputfield.SetActive (true);
 
 		currentMenu = addQuestions;
@@ -840,6 +843,7 @@ public class UIManager : MonoBehaviour
 		setDisplayText ("Waiting for another player...\n\n" +
 		String.Format ("Time in Queue: {0} seconds", Mathf.Round (currentMultiplayerWaitTime)));
 
+		// If we wait too long, we'll play against an AI
 		if (currentMultiplayerWaitTime > timeToWaitUntilRandomAI) {
 			slider.value = 5;
 			currentMenu = closeNetworkingThenAIGame;
@@ -848,6 +852,7 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+	// We don't need networking for a multiplayer AI game
 	void closeNetworkingThenAIGame ()
 	{
 		gameLogic.closeAllNetworking ();
@@ -908,9 +913,9 @@ public class UIManager : MonoBehaviour
 			game.nextRound ();
 
 			Question currentQuestion = game.currentTriviaRound.currentQuestion;
-
 			NetworkGameState network = gameLogic.ourGamestate;
 
+			// Send question information to client
 			network.RpcUpdateQuestion (currentQuestion.questionText);
 			network.RpcUpdateAnswer1 (currentQuestion.correctAnswer);
 			network.RpcUpdateAnswer2 (currentQuestion.incorrectAnswers [0]);
@@ -923,6 +928,7 @@ public class UIManager : MonoBehaviour
 		currentMenu = multiplayerNextRoundSyncTime;
 	}
 
+	// Wait some time to ensure client and server data are synced in multiplayer.
 	void multiplayerNextRoundSyncTime ()
 	{
 		slider.value -= Time.deltaTime;
@@ -1016,6 +1022,7 @@ public class UIManager : MonoBehaviour
 		setDisplayText (Scores);
 	}
 
+	// Send scores to leaderboard
 	IEnumerator PostScores (string name, int score)
 	{ 
 
@@ -1029,6 +1036,7 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+	// Get leaderboard to display
 	IEnumerator GetScores ()
 	{
 		WWW hs_get = new WWW (highscoreURL);
@@ -1114,6 +1122,10 @@ public class UIManager : MonoBehaviour
 
 			string slowLoading = "";
 
+			/*
+			 * 	If the server is taking a while to respond, remind the player that
+			 * 	the meducate server is only available while on the UNC network.
+			 */
 			if (gameLogic.serverSlowToRespond ()) {
 				slowLoading = "This is taking longer than expected...\n\n" +
 				"You seem to be connected to the internet,\n" +
@@ -1190,10 +1202,15 @@ public class UIManager : MonoBehaviour
 				game.networkedNextRound (network.questionText, network.answer1, network.answer2, network.answer3, network.answer4);
 
 				if (game.currentTriviaRound.round != gameLogic.theirGamestate.roundNumber) {
-					// Desync -- if this happens, we'll probably hit another exception first
+					/*
+					 * 	If the client and server get desynced, procced to the fatalError() menu.
+					 * 
+					 * 	If this happens, we'll probably hit another exception first.
+					 */
 					fatalError ();
 				}
 			} else {
+				// The server randomly places the star in multiplayer.
 				RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
 				gameLogic.randomlyPlaceStar (bounds, objects);
 			}
@@ -1220,6 +1237,7 @@ public class UIManager : MonoBehaviour
 			gameLogic.displayText += "YOU WIN!\n\n";
 		}
 
+		// At the end of a multiplayer game, close all networking interfaces.
 		if (gameLogic.currentlyNetworking ()) {
 			gameLogic.closeAllNetworking ();
 		}
@@ -1297,6 +1315,7 @@ public class UIManager : MonoBehaviour
 			RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
 
 			if (!gameLogic.currentlyNetworking ()) {
+				// The computer places their sword/shield block in this case.
 				gameLogic.computer.placeBlock (game.currentTriviaRound.playerAttacks (computer), bounds, objects);
 			}
 			
@@ -1332,8 +1351,10 @@ public class UIManager : MonoBehaviour
 		});
 
 		if (game.currentTriviaRound.playerAttacks (computer)) {
+			// We move the sword
 			objectVisibility (true, false, true);
 		} else {
+			// We move the shield
 			objectVisibility (false, true, true);
 		}
 
@@ -1352,6 +1373,7 @@ public class UIManager : MonoBehaviour
 
 			if (gameLogic.currentlyNetworking ()) {
 				if (gameLogic.isServer) {
+					// The server propagates health and damage info to the client.
 					gameLogic.theirGamestate.RpcUpdateClientHealth (game.enemyHealth);
 					gameLogic.theirGamestate.RpcUpdateServerHealth (game.playerHealth);
 
@@ -1369,6 +1391,7 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+	// Wait some time to ensure client and server data are synced in multiplayer.
 	void multiplayerCombatResultsSyncTime ()
 	{
 		slider.value -= Time.deltaTime;
@@ -1386,6 +1409,7 @@ public class UIManager : MonoBehaviour
 
 		if (slider.value <= 0) {
 			if (gameLogic.currentlyNetworking () && !gameLogic.isServer) {
+				// The client accepts the server's health and damage info at this point.
 				game.playerHealth = gameLogic.ourGamestate.clientHealth;
 				game.enemyHealth = gameLogic.ourGamestate.serverHealth;
 
@@ -1434,12 +1458,14 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+	// Wipe all saved user data for debugging (see GameLogicManager)
 	public void debugWipeAllSettings ()
 	{
 		slider.value = 10;
 		currentMenu = wipeSettingsVerification;
 	}
 
+	// Warns the user that we're wiping all settings for debugging.
 	void wipeSettingsVerification ()
 	{
 		slider.value -= Time.deltaTime;
