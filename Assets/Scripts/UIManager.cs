@@ -1202,18 +1202,21 @@ public class UIManager : MonoBehaviour
 	{
 		gameLogic.displayText = "";
 
+		// Purple
+		setDisplayColor (new Color (0.5f, 0, 0.5f));
+
 		if (game.playerHealth <= 0) {
-			setDisplayColor (Color.red);
 			gameLogic.displayText += "YOU LOSE!\n\n";
 		} else {
-			// Dark Green
-			setDisplayColor (new Color (0.0f, 0.5f, 0.0f));
 			gameLogic.displayText += "YOU WIN!\n\n";
 		}
 
 		if (gameLogic.currentlyNetworking ()) {
 			gameLogic.closeAllNetworking ();
 		}
+
+		setButtonsText (new string[] { "", "", "", "" });
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
 
 		// Restore ability to drag objects around for later games
 		objects [0].GetComponent<Draggable> ().draggingEnabled = true;
