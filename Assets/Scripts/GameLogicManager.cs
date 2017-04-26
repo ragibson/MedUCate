@@ -228,6 +228,11 @@ public class GameLogicManager : MonoBehaviour
 			PlayerPrefs.SetInt (String.Format ("Campaign{0}", i), campaignScores [i]);
 		}
 		PlayerPrefs.SetInt ("Selected Question Set", selectedSet);
+
+		if (String.IsNullOrEmpty (username)) {
+			username = "NEW USER";
+		}
+
 		saveAllQuestionSetsToDevice ();
 		PlayerPrefs.Save ();
 	}
