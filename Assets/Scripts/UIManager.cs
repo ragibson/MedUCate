@@ -861,7 +861,7 @@ public class UIManager : MonoBehaviour
 		if (slider.value <= 0) {
 			gameLogic.computer.level = UnityEngine.Random.Range (0, 9);
 			gameLogic.computer.updateSpeedAndDifficulty ();
-			gameLogic.gameMode = "Multiplayer Quick Play";
+			gameLogic.gameMode = "Multiplayer Quick Play AI";
 //			Debug.Log (gameLogic.computer.getLevelString ());
 			currentMenu = startGame;
 		} else {

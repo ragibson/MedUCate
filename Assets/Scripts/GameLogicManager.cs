@@ -152,6 +152,14 @@ public class GameLogicManager : MonoBehaviour
 				}
 			}
 		}
+
+		if (currentlyNetworking ()) {
+			ourGamestate.CmdUpdateTimeSinceLastSync (0);
+		}
+
+		if (String.Equals (gameMode, "Multiplayer Quick Play") && !currentlyNetworking ()) {
+			GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
+		}
 	}
 
 	// Returns true if we've waited two seconds or longer for a question set request

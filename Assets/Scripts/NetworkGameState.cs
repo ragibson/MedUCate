@@ -23,6 +23,9 @@ public class NetworkGameState : NetworkBehaviour
 	public GameObject star;
 
 	[SyncVar]
+	public float timeSinceLastSync;
+
+	[SyncVar]
 	public bool clientShieldAuthority;
 	[SyncVar]
 	public bool clientSwordAuthority;
@@ -72,7 +75,12 @@ public class NetworkGameState : NetworkBehaviour
 	{
 		ui = GameObject.Find ("UI").GetComponent<UIManager> ();
 
+		timeSinceLastSync = 0;
+
 		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
+
+		serverHealth = gameLogic.gameHP;
+		clientHealth = gameLogic.gameHP;
 
 		if (isLocalPlayer && hasAuthority) {
 			gameLogic.isServer = isServer;
@@ -320,10 +328,28 @@ public class NetworkGameState : NetworkBehaviour
 	{
 		damageBlocked = damage;
 	}
+
+	[Command]
+	public void CmdUpdateTimeSinceLastSync(float time) {
+		RpcUpdateTimeSinceLastSync (time);
+	}
     
+	[ClientRpc]
+	public void RpcUpdateTimeSinceLastSync (float time) {
+		timeSinceLastSync = time;
+	}
+
 	// Update is called once per frame
 	void Update ()
 	{
+		if (gameLogic.currentlyNetworking ()) {
+			timeSinceLastSync += Time.deltaTime;
+
+			if (timeSinceLastSync > 5) {
+				ui.fatalError ();
+			}
+		}
+
 		if (!isLocalPlayer) {
 			return;
 		}
@@ -348,5 +374,6 @@ public class NetworkGameState : NetworkBehaviour
 		if (gameStarted && isServer && NetworkServer.connections.Count < 2) {
 			ui.fatalError ();
 		}
+
 	}
 }
