@@ -6,6 +6,7 @@
   * [Leaderboard Setup](#Leaderboard)
   * [Website Setup](#Website)
   * [Multiplayer Setup](#Multiplayer)
+  * [Debugging](#Debug)
 
 <a name = "QuestionSets"></a>
 ## Adding Question Sets
@@ -62,3 +63,18 @@ The game currently runs using my Unity multiplayer personal subscription. You wi
 You must set the game up in the Unity editor for your own multiplayer subscription (20 concurrent users / 10 concurrent games for free).
 
 Alternatively, install Unity's matchmaking utilities on the server (for "unlimited" concurrent users) and update the Network Manager's "Matchmaker Host" in the Unity editor.
+
+<a name = "Debug"></a>
+## Debugging
+
+If something goes wrong on the server, the following commands may help.
+
+    # Will restart the web server (for the website)
+    sudo /etc/init.d/apache2 restart
+    # OR
+    sudo service apache2 restart
+    
+    # Will restart the mysql server (for the leaderboard)
+    sudo /etc/init.d/mysql restart
+    # OR
+    sudo service mysql restart
