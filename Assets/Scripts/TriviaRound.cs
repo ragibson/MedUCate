@@ -43,7 +43,8 @@ public class TriviaRound
 	public void Update ()
 	{
 		if (gameLogic.currentlyNetworking ()) {
-			gameLogic.computer.networkedUpdateTimeAndAnswer (gameLogic.networkedTheirAnswerTime (), gameLogic.networkedTheirAnswerCorrect ());
+			gameLogic.computer.networkedUpdateTimeAndAnswer (gameLogic.networkedTheirAnswerTime (),
+				gameLogic.networkedTheirAnswerCorrect ());
 		}
 
 		bool slowAnswer = (answerTime != roundTime && answerTime >= (roundTime - 3));
@@ -51,7 +52,8 @@ public class TriviaRound
 
 		// If networked, also consider the opponent's answer time
 		if (gameLogic.currentlyNetworking ()) {
-			slowAnswer |= (gameLogic.computer.answerTime != roundTime && gameLogic.computer.answerTime >= (roundTime - 3));
+			slowAnswer |= (gameLogic.computer.answerTime != roundTime &&
+			gameLogic.computer.answerTime >= (roundTime - 3));
 			noAnswer |= (gameLogic.computer.answerTime == roundTime);
 		}
 

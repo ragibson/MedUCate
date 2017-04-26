@@ -330,12 +330,14 @@ public class NetworkGameState : NetworkBehaviour
 	}
 
 	[Command]
-	public void CmdUpdateTimeSinceLastSync(float time) {
+	public void CmdUpdateTimeSinceLastSync (float time)
+	{
 		RpcUpdateTimeSinceLastSync (time);
 	}
-    
+
 	[ClientRpc]
-	public void RpcUpdateTimeSinceLastSync (float time) {
+	public void RpcUpdateTimeSinceLastSync (float time)
+	{
 		timeSinceLastSync = time;
 	}
 

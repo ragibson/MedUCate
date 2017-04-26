@@ -842,10 +842,16 @@ public class UIManager : MonoBehaviour
 
 		if (currentMultiplayerWaitTime > timeToWaitUntilRandomAI) {
 			slider.value = 5;
-			currentMenu = proceedToAIGame;
+			currentMenu = closeNetworkingThenAIGame;
 		} else {
 			currentMenu = multiPlayerQuickPlayWaitForGame;
 		}
+	}
+
+	void closeNetworkingThenAIGame ()
+	{
+		gameLogic.closeAllNetworking ();
+		currentMenu = proceedToAIGame;
 	}
 
 	void proceedToAIGame ()
@@ -857,6 +863,9 @@ public class UIManager : MonoBehaviour
 		setDisplayColor (Color.blue);
 		setDisplayText ("Found an Opponent!\n\n" +
 		"Setting up game...");
+
+		setButtonsText (new string[] { "", "", "", "" });
+		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
 
 		if (slider.value <= 0) {
 			gameLogic.computer.level = UnityEngine.Random.Range (0, 9);
@@ -1316,19 +1325,15 @@ public class UIManager : MonoBehaviour
 		slider.value = game.currentCombatRound.timeRemaining ();
 		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
 
+		setButtonsText (new string[] { "",
+			"",
+			"",
+			""
+		});
+
 		if (game.currentTriviaRound.playerAttacks (computer)) {
-			setButtonsText (new string[] { "",
-				"",
-				"",
-				""
-			});
 			objectVisibility (true, false, true);
 		} else {
-			setButtonsText (new string[] { "",
-				"",
-				"",
-				""
-			});
 			objectVisibility (false, true, true);
 		}
 

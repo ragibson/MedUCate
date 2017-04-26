@@ -36,6 +36,8 @@ public class GameLogicManager : MonoBehaviour
 
 	public float serverTimeout = 10;
 	public float timeLeftToWaitForServer = 0;
+	public Queue<String> setsToAdd = new Queue<String> ();
+
 	public float gameSyncTime = 1;
 
 	WWW setWWW = null;
@@ -62,16 +64,22 @@ public class GameLogicManager : MonoBehaviour
 
 	public MatchMaking matchMaker;
 
-	public Queue<String> setsToAdd = new Queue<String> ();
-
 	// Initialization
 	void Start ()
 	{
 		matchMaker = GameObject.Find ("Network Manager").GetComponent<MatchMaking> ();
 
 		// Get default question sets
-		foreach (String s in new String[] { "Mental", "Physical", "Social", "Nutritional" }) {
-			setsToAdd.Enqueue ("Default_" + s + "_Health_Set");
+		foreach (String s in new String[] { "mental", "physical", "social", "nutritional" }) {
+			setsToAdd.Enqueue ("default_" + s + "_health_set");
+		}
+
+		String[] setNames = PlayerPrefs.GetString ("Question Set Names").Split ('_');
+		foreach (string s in setNames) {
+			string setName = s.Replace (' ', '_').ToLower ();
+			if (!String.IsNullOrEmpty (setName) && !setsToAdd.Contains (setName)) {
+				setsToAdd.Enqueue (setName);
+			}
 		}
 
 		getPlayerPrefs ();
