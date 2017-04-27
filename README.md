@@ -21,3 +21,9 @@ Should work natively on Unity versions >= 5.5.1f1, but will be compatible with m
 <a name = "Installation"></a>
 ## Installation
 Simply importing all the assets into a new Unity project and opening the Main scene should suffice.
+
+In Unity,
+
+    Edit > Project Settings > Player > Resolution and Presentation > Orientation
+
+will allow you to restrict the game to portrait only (for mobile devices).
