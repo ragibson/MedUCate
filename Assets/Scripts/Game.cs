@@ -72,8 +72,6 @@ public class Game
 		// If not networked, use computer player
 		if (!gameLogic.currentlyNetworking ()) {
 			gameLogic.computer.updateTimeAndAnswer ();
-		} else {
-			resetNetworkedAnswers ();
 		}
 
 		currentTriviaRound = new TriviaRound (roundTime, currentQuestion, answers, currentQuestion.correctAnswer, round);

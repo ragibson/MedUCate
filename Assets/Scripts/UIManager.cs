@@ -907,8 +907,6 @@ public class UIManager : MonoBehaviour
 
 	void multiplayerSetupNextRound ()
 	{
-		game.resetNetworkedAnswers ();
-
 		if (gameLogic.isServer) {
 			game.nextRound ();
 
@@ -943,6 +941,13 @@ public class UIManager : MonoBehaviour
 		setDisplayText ("Syncing next round...");
 
 		if (slider.value <= 0) {
+			/*
+			 * 	This delay prevents a race condition where the client 
+			 * 	and server could get desynced due to answer resetting 
+			 * 	being interpreted by the client as the server never
+			 *	answering in the last trivia round.
+			 */
+			game.resetNetworkedAnswers ();
 			currentMenu = continueGame;
 		} else {
 			currentMenu = multiplayerNextRoundSyncTime;
@@ -1084,7 +1089,7 @@ public class UIManager : MonoBehaviour
 			hideOrShow = "SHOW";
 		}
 
-		setButtonsText (new string[] { String.Format("<<< {0} ANSWER >>>", hideOrShow),
+		setButtonsText (new string[] { String.Format ("<<< {0} ANSWER >>>", hideOrShow),
 			"CHANGE QUESTION >>>", 
 			"<<< CHANGE QUESTION",
 			"<<< BACK TO PROFILE"

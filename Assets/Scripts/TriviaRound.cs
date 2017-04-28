@@ -69,17 +69,11 @@ public class TriviaRound
 		}
 
 		currentTime += Time.deltaTime;
-		if (timeRemaining () < 3 && slowAnswer && !addedExtraTime) {
+		if (timeRemaining () < 0 && (slowAnswer || noAnswer) && !addedExtraTime) {
 			/*
-			 * 	If the player answers with less than three seconds to go, we give 
-			 * 	them some extra time to read the results of the round
-			 */
-			addedExtraTime = true;
-			currentTime = roundTime - 3;
-		} else if (timeRemaining () < 0 && noAnswer && !addedExtraTime) {
-			/*
-			 * 	If the player does not answer at all, we also give them some extra
-			 * 	time to read the results of the round
+			 * 	If the player does not answer at all or answers with less
+			 * 	than 3 seconds left, we give them some extra time to read
+			 * 	the results of the round
 			 */
 			addedExtraTime = true;
 			currentTime = roundTime - 3;
