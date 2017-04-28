@@ -1367,6 +1367,7 @@ public class UIManager : MonoBehaviour
 
 		if (game.currentCombatRound.calculateDamage) {
 
+			objectVisibility (true, true, true);
 			// This calculates damageDealt, damageBlocked
 			game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
 
@@ -1390,7 +1391,6 @@ public class UIManager : MonoBehaviour
 				currentMenu = multiplayerCombatResultsSyncTime;
 			} else {
 				slider.value = game.roundTime / 2;
-				objectVisibility (true, true, true);
 				currentMenu = combatResults;
 			}
 		}
