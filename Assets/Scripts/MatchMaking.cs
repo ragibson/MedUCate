@@ -20,6 +20,15 @@ public class MatchMaking : MonoBehaviour
 	void Start ()
 	{
 		manager = NetworkManager.singleton;
+		/*
+		 * 	Unity multiplayer fix for wireless networks.
+		 * 
+		 * 	They normally assume that you're not connecting over
+		 * 	a wireless network and thus set the drop thresholds 
+		 * 	far too low for our purposes.
+		 */
+		manager.connectionConfig.NetworkDropThreshold = 50;
+		manager.connectionConfig.OverflowDropThreshold = 10;
 	}
 
 	public void startMatchMaker ()
