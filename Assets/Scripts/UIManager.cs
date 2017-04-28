@@ -1079,7 +1079,12 @@ public class UIManager : MonoBehaviour
 
 	void reviewQuestions ()
 	{
-		setButtonsText (new string[] { "<<< HIDE ANSWER >>>",
+		string hideOrShow = "HIDE";
+		if (gameLogic.hideAnswers) {
+			hideOrShow = "SHOW";
+		}
+
+		setButtonsText (new string[] { String.Format("<<< {0} ANSWER >>>", hideOrShow),
 			"CHANGE QUESTION >>>", 
 			"<<< CHANGE QUESTION",
 			"<<< BACK TO PROFILE"
