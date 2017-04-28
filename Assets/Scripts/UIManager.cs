@@ -941,15 +941,17 @@ public class UIManager : MonoBehaviour
 		setDisplayText ("Syncing next round...");
 
 		if (slider.value <= 0) {
-			/*
-			 * 	This delay prevents a race condition where the client 
-			 * 	and server could get desynced due to answer resetting 
-			 * 	being interpreted by the client as the server never
-			 *	answering in the last trivia round.
-			 */
-			game.resetNetworkedAnswers ();
 			currentMenu = continueGame;
 		} else {
+			if (slider.value <= gameLogic.gameSyncTime / 2) {
+				/*
+				 * 	This delay prevents a race condition where the client 
+				 * 	and server could get desynced due to answer resetting 
+				 * 	being interpreted by the client as the server never
+				 *	answering in the last trivia round.
+				 */
+				game.resetNetworkedAnswers ();
+			}
 			currentMenu = multiplayerNextRoundSyncTime;
 		}
 	}

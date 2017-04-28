@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// Sync Game States 10 times per second
-[NetworkSettings (sendInterval = 0.1f)]
+// Sync Game States 4 times per second
+[NetworkSettings (sendInterval = 0.25f)]
 public class NetworkGameState : NetworkBehaviour
 {
 
