@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
 	private Settings settings;
 	private ComputerPlayer computer;
 	private GameLogicManager gameLogic;
+	private SoundEffectManager soundEffects;
 
 	public GameObject primaryDisplay;
 	public Slider slider;
@@ -35,6 +36,7 @@ public class UIManager : MonoBehaviour
 		settings = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ().settings;
 		computer = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ().computer;
 		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
+		soundEffects = GameObject.Find ("Sound Effect Manager").GetComponent<SoundEffectManager> ();
 		slider = GameObject.Find ("Timer Slider").GetComponent<Slider> ();
 		currentMenu = connectingToServer;
 
@@ -86,6 +88,7 @@ public class UIManager : MonoBehaviour
 	 */
 	public void buttonPressed (int i)
 	{
+		soundEffects.buttonPressSound ();
 		buttonBehaviors [i] ();
 	}
 
@@ -1268,6 +1271,9 @@ public class UIManager : MonoBehaviour
 			gameLogic.displayText += "YOU LOSE!\n\n";
 		} else {
 			gameLogic.displayText += "YOU WIN!\n\n";
+
+			// Play a fanfare sound effect
+			soundEffects.winFanfareSound ();
 		}
 
 		// At the end of a multiplayer game, close all networking interfaces.
@@ -1421,6 +1427,10 @@ public class UIManager : MonoBehaviour
 				currentMenu = multiplayerCombatResultsSyncTime;
 			} else {
 				slider.value = game.roundTime / 2;
+
+				// Play a sword clash sound effect when objects appear
+				soundEffects.swordClashSound ();
+
 				currentMenu = combatResults;
 			}
 		}
@@ -1454,6 +1464,10 @@ public class UIManager : MonoBehaviour
 
 			slider.value = game.roundTime / 2;
 			objectVisibility (true, true, true);
+
+			// Play a sword clash sound effect when objects appear
+			soundEffects.swordClashSound ();
+
 			currentMenu = combatResults;
 		}
 	}
@@ -1476,8 +1490,10 @@ public class UIManager : MonoBehaviour
 		 * 	This has to be done before proceeding to endGame() to
 		 * 	avoid a race condition.
 		 */
-		if (game.playerHealth < 1 || game.enemyHealth < 1) {
-			gameLogic.ourGamestate.gameOver = true;
+		if (gameLogic.currentlyNetworking ()) {
+			if (game.playerHealth < 1 || game.enemyHealth < 1) {
+				gameLogic.ourGamestate.gameOver = true;
+			}
 		}
 
 		if (slider.value > 0) {
