@@ -230,6 +230,9 @@ public class GameLogicManager : MonoBehaviour
 		}
 
 		questionSets.Add (setToAdd);
+
+		updatePlayerPrefs ();
+
 		return true;
 	}
 

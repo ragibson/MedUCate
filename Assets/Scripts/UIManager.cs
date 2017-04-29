@@ -277,12 +277,17 @@ public class UIManager : MonoBehaviour
 
 	void removeThisSet ()
 	{
+		// Make sure we're not removing beyond our selected set index
+		gameLogic.setCurrentSet (0);
+
 		string setName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text;
 		for (int i = 0; i < gameLogic.questionSets.Count; i++) {
 			if (String.Equals (gameLogic.questionSets [i].setName.ToLower (), setName.ToLower ())) {
 				gameLogic.questionSets.RemoveAt (i);
 			}
 		}
+
+		// Restore selected set to first set
 		gameLogic.setCurrentSet (0);
 
 		gameLogic.updatePlayerPrefs ();
@@ -1075,7 +1080,7 @@ public class UIManager : MonoBehaviour
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
-		setDisplayText ("MAIN MENU > PROFILE > CHANGE QUESTIONS\n\n" +
+		setDisplayText ("MAIN MENU > PROFILE > SELECT A QUESTION SET\n\n" +
 		"CURRENTLY SELECTED SET NAME -\n" +
 		settings.selected.setName +
 		String.Format ("\n\nSELECTED? - {0}\n", gameLogic.getSetToChange ().selected ? "Yes" : "No") +
