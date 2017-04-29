@@ -27,3 +27,9 @@ In Unity,
     Edit > Project Settings > Player > Resolution and Presentation > Orientation
 
 will allow you to restrict the game to portrait only (for mobile devices).
+
+If you're building the game for older devices, make sure
+
+    Edit > Project Settings > Player > Other Settings > Minimum API Level
+
+agrees with your version of Android.
