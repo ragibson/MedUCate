@@ -3,16 +3,9 @@
 A trivia/learning game created for a client as the primary project of COMP 585H at UNC-Chapel Hill.
 
 # Table of Contents
-  * [TODO](#TODO)
   * [Requirements](#Requirements)
   * [Installation](#Installation)
-
-<a name = "TODO"></a>
-## TODO
-  * General
-    * Comment code
-    * Add documentation
-    * Bug testing
+  * [Networking Setup](#Networking)
 
 <a name = "Requirements"></a>
 ## Requirements
@@ -33,3 +26,7 @@ If you're building the game for older devices, make sure
     Edit > Project Settings > Player > Other Settings > Minimum API Level
 
 agrees with your version of Android.
+
+<a name = "Networking"></a>
+## Networking Setup
+Instructions for setting up the game's networking can be found [here](Networking/README.md)

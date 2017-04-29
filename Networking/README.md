@@ -17,6 +17,8 @@ CSVs should be stored in lowercase with spaces replaced with underscores on the 
 
 Make sure that the .csv contains no "special characters" or the game may be unable to parse it (e.g. using the ellipsis character "…" instead of "...").
 
+The name of the .csv file will become the name of the question set in game.
+
 Note: Question and answer lengths should be limited for reading ease, but the game will simply not accommodate answers longer than ~80 characters and questions longer than ~175 characters.
 
 <a name = "Server"></a>
