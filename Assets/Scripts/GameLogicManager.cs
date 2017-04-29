@@ -185,7 +185,7 @@ public class GameLogicManager : MonoBehaviour
 		}
 
 		// If playing multiplayer and lose connection, we proceed to the fatalError() menu (see UIManager).
-		if (String.Equals (gameMode, "Multiplayer Quick Play") && !currentlyNetworking ()) {
+		if (String.Equals (gameMode, "Multiplayer Quick Play") && !ourGamestate.gameOver && !currentlyNetworking ()) {
 			GameObject.Find ("UI").GetComponent<UIManager> ().fatalError ();
 		}
 	}

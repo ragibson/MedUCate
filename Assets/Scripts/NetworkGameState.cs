@@ -84,6 +84,7 @@ public class NetworkGameState : NetworkBehaviour
 	public bool serverAnswerCorrect;
 
 	bool gameStarted;
+	public bool gameOver = false;
 
 	GameLogicManager gameLogic;
 
@@ -411,7 +412,7 @@ public class NetworkGameState : NetworkBehaviour
 		}
 
 		// If we lose connection to client, proceed to the fatalError() menu (see UIManager).
-		if (gameStarted && isServer && NetworkServer.connections.Count < 2) {
+		if (!gameOver && gameStarted && isServer && NetworkServer.connections.Count < 2) {
 			ui.fatalError ();
 		}
 

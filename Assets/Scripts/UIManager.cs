@@ -1399,6 +1399,8 @@ public class UIManager : MonoBehaviour
 			// This calculates damageDealt, damageBlocked
 			game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
 
+
+
 			if (game.currentTriviaRound.playerAttacks (computer)) {
 				game.dealDamage (0, damageDealt - damageBlocked);
 			} else {
@@ -1466,6 +1468,17 @@ public class UIManager : MonoBehaviour
 			"Your Health: " + game.playerHealth,
 			"Their Health: " + game.enemyHealth
 		});
+
+		/*
+		 * 	Make sure the networking knows the game is over, so we
+		 * 	don't throw an error when the other player disconnects.
+		 * 
+		 * 	This has to be done before proceeding to endGame() to
+		 * 	avoid a race condition.
+		 */
+		if (game.playerHealth < 1 || game.enemyHealth < 1) {
+			gameLogic.ourGamestate.gameOver = true;
+		}
 
 		if (slider.value > 0) {
 
