@@ -172,9 +172,9 @@ public class GameLogicManager : MonoBehaviour
 
 				// Update saved user data and declare setup complete
 				if (!initialSetupComplete) {
+					initialSetupComplete = true;
 					updatePlayerPrefs ();
 					getPlayerPrefs ();
-					initialSetupComplete = true;
 				}
 			}
 		}
@@ -270,7 +270,14 @@ public class GameLogicManager : MonoBehaviour
 		for (int i = 0; i < 9; i++) {
 			PlayerPrefs.SetInt (String.Format ("Campaign{0}", i), campaignScores [i]);
 		}
-		PlayerPrefs.SetInt ("Selected Question Set", selectedSet);
+
+		/*
+		 * 	We need to wait for initial setup to be complete since otherwise, we'll
+		 * 	discover that we have no question sets and will force selectedSet = 0
+		 */
+		if (initialSetupComplete) {
+			PlayerPrefs.SetInt ("Selected Question Set", selectedSet);
+		}
 
 		if (String.IsNullOrEmpty (username)) {
 			username = "NEW USER";
@@ -291,13 +298,14 @@ public class GameLogicManager : MonoBehaviour
 		for (int i = 0; i < 9; i++) {
 			campaignScores [i] = PlayerPrefs.GetInt (String.Format ("Campaign{0}", i));
 		}
+
+		getQuestionSetsFromDevice ();
+
 		selectedSet = PlayerPrefs.GetInt ("Selected Question Set");
 
 		if (selectedSet >= questionSets.Count) {
 			selectedSet = 0;
 		}
-
-		getQuestionSetsFromDevice ();
 
 		setCurrentSet (selectedSet);
 	}
