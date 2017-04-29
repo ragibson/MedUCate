@@ -782,6 +782,7 @@ public class UIManager : MonoBehaviour
 		currentMenu = multiPlayerQuickPlay;
 	}
 
+	float fatalErrorTimeUntilExit;
 	/*
 	 * 	Unity networking is currently unable to handle errors, so
 	 * 	we have to exit the application completely
@@ -789,14 +790,17 @@ public class UIManager : MonoBehaviour
 	public void fatalError ()
 	{
 		gameLogic.closeAllNetworking ();
-		slider.value = gameLogic.secondsPerRound / 2;
+		fatalErrorTimeUntilExit = gameLogic.secondsPerRound / 2;
 		currentMenu = fatalErrorNotification;
 	}
 
 	void fatalErrorNotification ()
 	{
-		slider.value -= Time.deltaTime;
-		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+		// This needs to be done in a variable since errors can break the slider
+		fatalErrorTimeUntilExit -= Time.deltaTime;
+
+		slider.value = fatalErrorTimeUntilExit;
+		slider.GetComponentInChildren<Text> ().text = "" + (int)fatalErrorTimeUntilExit;
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.red);
@@ -804,11 +808,11 @@ public class UIManager : MonoBehaviour
 		"we hit a fatal error.\n\n" +
 		"If this is reproducable,\n" +
 		"please contact the developers.\n\n" +
-		"Exiting game...");
+		String.Format ("Exiting game in {0} seconds...", (int)fatalErrorTimeUntilExit));
 		setButtonsText (new string[] { "", "", "", "" });
 		setButtonBehaviors (new Action[] { noMenu, noMenu, noMenu, noMenu });
 
-		if (slider.value <= 0) {
+		if (fatalErrorTimeUntilExit <= 0) {
 			currentMenu = exitGame;
 		} else {
 			currentMenu = fatalErrorNotification;

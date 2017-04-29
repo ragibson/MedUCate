@@ -48,6 +48,10 @@ Then, place the addscore.php and display.php scripts in "DocumentRoot/html" and 
 
 Finally, update the addScoreURL and highScoreURL in [UIManager.cs](../Assets/Scripts/UIManager.cs) and the leaderboard will work with the game.
 
+The leaderboard currently shows the top five players in the game, but this can by easily changed in [display.php](display.php)
+
+If this game is ever available on a public server, a hash should be added to the leaderboard to prevent spoofing of player scores.
+
 <a name = "Website"></a>
 ## Website Setup
 
