@@ -67,6 +67,9 @@ public class GameLogicManager : MonoBehaviour
 	// Initialization
 	void Start ()
 	{
+		// Get saved user data from device
+		getPlayerPrefs ();
+
 		matchMaker = GameObject.Find ("Network Manager").GetComponent<MatchMaking> ();
 
 		// Get default question sets from server
@@ -82,9 +85,6 @@ public class GameLogicManager : MonoBehaviour
 				setsToAdd.Enqueue (setName);
 			}
 		}
-
-		// Get saved user data from device
-		getPlayerPrefs ();
 
 		if (debugDeleteAllSettings) {
 			UIManager UI = GameObject.Find ("UI").GetComponent<UIManager> ();

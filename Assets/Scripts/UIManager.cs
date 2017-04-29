@@ -173,14 +173,14 @@ public class UIManager : MonoBehaviour
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > SINGLEPLAYER\n\n" +
 		"QUICK PLAY -\n" +
-		"PLAY YOUR SELECTED QUESTIONS\n" +
-		"AGAINST A COMPUTER OPPONENT\n\n" +
+		"PLAY AGAINST A COMPUTER\n" +
+		"OPPONENT OF ANY DIFFICULTY\n\n" +
 		"TUTORIAL -\n" +
 		"LEARN HOW TO PLAY\n\n" +
 		"CAMPAIGN -\n" +
-		"IF YOU CAN COMPLETE ALL THE\n" +
-		"LEVELS, THEN YOU HAVE\n" +
-		"COMPLETED YOUR LEARNING");
+		"SEE IF YOU CAN COMPLETE ALL\n" +
+		"NINE LEVELS WITH YOUR\n" +
+		"FAVORITE QUESTION SET");
 
 		currentMenu = singlePlayer;
 	}
@@ -198,9 +198,10 @@ public class UIManager : MonoBehaviour
 		setDisplayColor (Color.red);
 		setDisplayText ("MAIN MENU > MULTIPLAYER\n\n" +
 		"QUICK PLAY -\n" +
-		"PLAY QUESTIONS AGAINST A\n" +
-		"HUMAN OPPONENT\n\n" +
+		"PLAY AGAINST ANOTHER PERSON\n" +
+		"OVER THE INTERNET\n\n" +
 		"ONE MAN ARMY -\n" +
+		"PLAY AGAINST THE COMPUTER AND\n" +
 		"RISK REPUTATION TO EARN A SPOT\n" +
 		"ON THE LEADERBOARD");
 
@@ -210,8 +211,8 @@ public class UIManager : MonoBehaviour
 	void profile ()
 	{
 		setButtonsText (new string[] {
-			"SELECT QUESTION SETS >>>",
-			"ADD/REMOVE SETS, USERNAME >>>",
+			"SELECT A QUESTION SET >>>",
+			"CHANGE SETS AND USERNAME >>>",
 			"REVIEW QUESTIONS >>>",
 			"<<< BACK TO MENU"
 		});
@@ -220,16 +221,16 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [3]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > PROFILE\n\n" +
-		"CHANGE QUESTIONS -\n" +
-		"CHANGE YOUR CURRENT\n" +
-		"QUESTION SET\n\n" +
-		"ADD QUESTIONS -\n" +
-		"IMPORT YOUR OWN QUESTIONS\n" +
-		"FROM A CODE TO CUSTOMIZE\n" +
-		"YOUR GAMES\n\n" +
+		"SELECT A QUESTION SET -\n" +
+		"CHANGE YOUR SELECTED SET\n\n" +
+		"CHANGE SETS AND USERNAME -\n" +
+		"IMPORT YOUR OWN QUESTION\n" +
+		"SETS AND CHANGE YOUR\n" +
+		"ONLINE USERNAME\n\n" +
 		"REVIEW QUESTIONS -\n" +
-		"SHOW ALL THE QUESTIONS FOR THE\n" +
-		"CURRENT QUESTION SET");
+		"SHOW ALL THE QUESTIONS AND\n" +
+		"ANSWERS FROM THE\n" +
+		"SELECTED QUESTION SET");
 
 		// Make sure the input field for adding questions is not being shown
 		gameLogic.inputfield.SetActive (false);
@@ -241,9 +242,9 @@ public class UIManager : MonoBehaviour
 	void addQuestions ()
 	{
 		setButtonsText (new string[] {
-			"Add Set To Device",
-			"Remove Set From Device",
-			"Use as new Username",
+			"<<< Add Set To Device >>>",
+			"<<< Remove Set From Device >>>",
+			"<<< Use as new Username >>>",
 			"<<< BACK TO PROFILE"
 		});
 		setButtonBehaviors (new Action[] { addThisSet, removeThisSet, changeUsername, profile });
@@ -583,7 +584,7 @@ public class UIManager : MonoBehaviour
 		setDisplayText ("THAT'S ALL YOU NEED TO KNOW TO PLAY!\n\n" +
 		"TO START OUT, TRY SINGLEPLAYER QUICK PLAY\n" +
 		"OR THE SINGLEPLAYER CAMPAIGN\n\n" +
-		"IF YOU'RE CONFIDENT IN YOUR SKILLS\n" +
+		"IF YOU'RE CONFIDENT IN YOUR SKILLS,\n" +
 		"TRY JUMPING STRAIGHT INTO MULTIPLAYER\n\n" +
 		"HAVE FUN AND DON'T FORGET TO SET YOUR\n" +
 		"USERNAME IN THE PROFILE MENU!\n\n" +
@@ -1039,7 +1040,7 @@ public class UIManager : MonoBehaviour
 		yield return hs_post;
 
 		if (hs_post.error != null) {
-			Scores = "There was an error posting the high score: " + hs_post.error;
+//			Scores = "There was an error posting the high score: " + hs_post.error;
 		}
 	}
 
@@ -1050,7 +1051,9 @@ public class UIManager : MonoBehaviour
 		yield return hs_get;
 
 		if (hs_get.error != null) {
-			Scores = "There was an error getting the high score board: " + hs_get.error;
+			Scores = "Could not access the leaderboard.\n\n" +
+			"Are you connected to the UNC Network?";
+//			Scores = "There was an error getting the high score board: " + hs_get.error;
 		} else {
 			Scores = hs_get.text;
 		} 
@@ -1075,9 +1078,9 @@ public class UIManager : MonoBehaviour
 		setDisplayText ("MAIN MENU > PROFILE > CHANGE QUESTIONS\n\n" +
 		"CURRENTLY SELECTED SET NAME -\n" +
 		settings.selected.setName +
-		String.Format ("\n\nSELECTED? - {0}\n", gameLogic.getSetToChange ().selected) +
+		String.Format ("\n\nSELECTED? - {0}\n", gameLogic.getSetToChange ().selected ? "Yes" : "No") +
 		String.Format ("NAME - {0}\n", gameLogic.getSetToChange ().setName) +
-		String.Format ("AUTHORS - {0}\n", gameLogic.getSetToChange ().authorName) +
+		String.Format ("AUTHOR - {0}\n", gameLogic.getSetToChange ().authorName) +
 		String.Format ("NUMBER OF QUESTIONS - {0}\n", gameLogic.getSetToChange ().numberOfQuestions ()) +
 		String.Format ("(SET {0} OF {1})", gameLogic.setToChange + 1, gameLogic.questionSets.Count));
 
@@ -1109,7 +1112,7 @@ public class UIManager : MonoBehaviour
 		string text = "MAIN MENU > PROFILE > REVIEW\n\n" +
 		              "CURRENTLY SELECTED SET NAME -\n" +
 		              settings.selected.setName +
-		              "\n\nSELECTED -\n" +
+		              "\n\nQUESTION -\n" +
 		              gameLogic.getCurrentQuestion ().questionText +
 		              "\n\n";
 		if (!gameLogic.hideAnswers) {
