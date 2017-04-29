@@ -150,6 +150,7 @@ public class UIManager : MonoBehaviour
 		currentMenu = mainMenu;
 	}
 
+	// Exits the game (but not the Unity editor)
 	void exitGame ()
 	{
 		Application.Quit ();
@@ -782,7 +783,8 @@ public class UIManager : MonoBehaviour
 		currentMenu = multiPlayerQuickPlay;
 	}
 
-	float fatalErrorTimeUntilExit;
+	float fatalErrorTimeUntilExit = 0;
+	bool fatalErrorAlreadyThrown = false;
 	/*
 	 * 	Unity networking is currently unable to handle errors, so
 	 * 	we have to exit the application completely
@@ -790,8 +792,15 @@ public class UIManager : MonoBehaviour
 	public void fatalError ()
 	{
 		gameLogic.closeAllNetworking ();
-		fatalErrorTimeUntilExit = gameLogic.secondsPerRound / 2;
-		currentMenu = fatalErrorNotification;
+
+		// Make sure we don't repeatedly reset the exit timer
+		if (!fatalErrorAlreadyThrown) {
+			fatalErrorTimeUntilExit = gameLogic.secondsPerRound / 2;
+			fatalErrorAlreadyThrown = true;
+		}
+		if (fatalErrorTimeUntilExit > 0) {
+			currentMenu = fatalErrorNotification;
+		}
 	}
 
 	void fatalErrorNotification ()
@@ -806,7 +815,7 @@ public class UIManager : MonoBehaviour
 		setDisplayColor (Color.red);
 		setDisplayText ("Opponent Disconnected or\n" +
 		"we hit a fatal error.\n\n" +
-		"If this is reproducable,\n" +
+		"If this is reproducible,\n" +
 		"please contact the developers.\n\n" +
 		String.Format ("Exiting game in {0} seconds...", (int)fatalErrorTimeUntilExit));
 		setButtonsText (new string[] { "", "", "", "" });
