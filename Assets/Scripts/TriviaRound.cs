@@ -60,13 +60,10 @@ public class TriviaRound
 		bool slowAnswer = (answerTime != roundTime && answerTime >= (roundTime - 3));
 		bool noAnswer = (answerTime == roundTime);
 
-		// If networked, also consider the opponent's answer time.
-		if (gameLogic.currentlyNetworking ()) {
-			slowAnswer |= (gameLogic.computer.answerTime != roundTime &&
-			gameLogic.computer.answerTime >= (roundTime - 3));
-			
-			noAnswer |= (gameLogic.computer.answerTime == roundTime);
-		}
+		// Also consider the opponent's answer time.
+		slowAnswer |= (gameLogic.computer.answerTime != roundTime &&
+		gameLogic.computer.answerTime >= (roundTime - 3));
+		noAnswer |= (gameLogic.computer.answerTime == roundTime);
 
 		currentTime += Time.deltaTime;
 		if (timeRemaining () < 0 && (slowAnswer || noAnswer) && !addedExtraTime) {
@@ -149,6 +146,15 @@ public class TriviaRound
 		} else {
 			if (computerTime == roundTime) {
 				computerAnswerTimeText = "YOUR OPPONENT DID NOT ANSWER\n\n";
+			}
+
+			/*
+			 * 	Wait to display the computer player's answer time until it would
+			 * 	have actually been given (to be consistent with multiplayer games)
+			 */
+			if (!addedExtraTime && computerTime > currentTime) {
+				computerAnswerTimeText = "YOUR OPPONENT HAS NOT ANSWERED YET\n\n";
+				actionText = "";
 			}
 		}
 
