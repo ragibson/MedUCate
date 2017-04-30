@@ -27,6 +27,12 @@ If you're building the game for older devices, make sure
 
 agrees with your version of Android.
 
+To reduce some audio decoding delay on mobile devices, change
+
+    Edit > Project Settings > Audio > DSP Buffer Size
+
+to "Best latency".
+
 <a name = "Networking"></a>
 ## Networking Setup
-Instructions for setting up the game's networking can be found [here](Networking/README.md)
+Instructions for setting up the game's networking can be found [here](Networking/README.md).
