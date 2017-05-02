@@ -3,9 +3,27 @@
 A trivia/learning game created for a client as the primary project of COMP 585H at UNC-Chapel Hill.
 
 # Table of Contents
+  * [TODO](#TODO)
   * [Requirements](#Requirements)
   * [Installation](#Installation)
   * [Networking Setup](#Networking)
+
+<a name = "TODO"></a>
+## TODO
+  * General
+    * Review Questions menu needs to take the form "Set name; Question # of # - ...; Correct Answer - ...; Other Answers - ...;"
+    * Vertically center text on all menus?
+    * Text input field should delete everything when clicked on and have centered default text, if possible.
+    * Singleplayer quickplay menu should have (option # of #) removed.
+    * Change Campaign Menu (option # of #)?
+    * Multiplayer menu should have (option 1 of 1) removed.
+    * Combat time should be reduced to 5 seconds, results to 2.5 seconds (preferably, roundTime/2 and roundTime/4, respectively).
+    * Slider should maintain at zero after adding extra time in a trivia round.
+    * Slider max value should be set to round start time to have the slider visually start at the far right of the screen in all cases.
+    * Usernames should be unique.
+    * Make game pieces larger -- 25% of the game area, but keep the star block somewhat small.
+    * Start blocks with some overlap at start of new combat round?
+    * Multiplayer add +100 reputation on game win.
 
 <a name = "Requirements"></a>
 ## Requirements
