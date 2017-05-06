@@ -39,6 +39,7 @@ public class UIManager : MonoBehaviour
 		gameLogic = GameObject.Find ("GameLogicManager").GetComponent<GameLogicManager> ();
 		soundEffects = GameObject.Find ("Sound Effect Manager").GetComponent<SoundEffectManager> ();
 		slider = GameObject.Find ("Timer Slider").GetComponent<Slider> ();
+		slider.maxValue = gameLogic.secondsPerRound;
 		currentMenu = connectingToServer;
 
 		objectVisibility (false, false, false);

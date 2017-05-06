@@ -11,7 +11,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 <a name = "TODO"></a>
 ## TODO
   * General
-    * Slider max value should be set to round start time to have the slider visually start at the far right of the screen in all cases.
     * Usernames should be unique.
     * Make game pieces larger -- 25% of the game area, but keep the star block somewhat small.
     * Start blocks with some overlap at start of new combat round?
