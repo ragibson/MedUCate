@@ -686,21 +686,23 @@ public class GameLogicManager : MonoBehaviour
 	}
 
 	/*
-	 * 	Randomly choose placement of the star block	
+	 * 	Randomly choose initial placement of all game pieces
 	 * 
 	 * 	params:
 	 * 		bounds: the RectTransform of the play area
 	 * 		objects: [Sword, Shield, Star]
 	 */
-	public void randomlyPlaceStar (RectTransform bounds, GameObject[] objects)
+	public void randomlyPlaceBlocks (RectTransform bounds, GameObject[] objects)
 	{
-		float maxXDisplacement = bounds.rect.width * bounds.localScale.x / 2 - objects [2].transform.localScale.x / 2;
-		float maxYDisplacement = bounds.rect.height * bounds.localScale.y / 2 - objects [2].transform.localScale.y / 2;
+		for (int i = 0; i < objects.Length; i++) {
+			float maxXDisplacement = bounds.rect.width * bounds.localScale.x / 2 - objects [i].transform.localScale.x / 2;
+			float maxYDisplacement = bounds.rect.height * bounds.localScale.y / 2 - objects [i].transform.localScale.y / 2;
 
-		Vector3 randomPlacement = new Vector3 (bounds.position.x + UnityEngine.Random.Range (-100, 100) * maxXDisplacement / 100,
-			                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
-			                          objects [2].transform.position.z);
-		objects [2].transform.position = randomPlacement;
+			Vector3 randomPlacement = new Vector3 (bounds.position.x + UnityEngine.Random.Range (-100, 100) * maxXDisplacement / 100,
+				                          bounds.position.y + UnityEngine.Random.Range (-100, 100) * maxYDisplacement / 100,
+				                          objects [i].transform.position.z);
+			objects [i].transform.position = randomPlacement;
+		}
 	}
 
 	// Look at the next multiplayer room (see multiPlayerJoinGame() in UIManager)

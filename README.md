@@ -12,8 +12,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 ## TODO
   * General
     * Usernames should be unique.
-    * Make game pieces larger -- 25% of the game area, but keep the star block somewhat small.
-    * Start blocks with some overlap at start of new combat round?
     * Multiplayer add +100 reputation on game win.
 
 <a name = "Requirements"></a>

@@ -463,7 +463,7 @@ public class UIManager : MonoBehaviour
 		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
 
 		RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
-		gameLogic.randomlyPlaceStar (bounds, objects);
+		gameLogic.randomlyPlaceBlocks (bounds, objects);
 
 		objectVisibility (true, false, true);
 
@@ -532,7 +532,7 @@ public class UIManager : MonoBehaviour
 		game = new Game (gameLogic.gameHP, gameLogic.secondsPerRound, gameLogic.damagePerAttack);
 
 		RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
-		gameLogic.randomlyPlaceStar (bounds, objects);
+		gameLogic.randomlyPlaceBlocks (bounds, objects);
 
 		objectVisibility (true, true, true);
 
@@ -1267,13 +1267,13 @@ public class UIManager : MonoBehaviour
 			} else {
 				// The server randomly places the star in multiplayer.
 				RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
-				gameLogic.randomlyPlaceStar (bounds, objects);
+				gameLogic.randomlyPlaceBlocks (bounds, objects);
 			}
 		} else {
 			game.nextRound ();
 
 			RectTransform bounds = primaryDisplay.GetComponent<RectTransform> ();
-			gameLogic.randomlyPlaceStar (bounds, objects);
+			gameLogic.randomlyPlaceBlocks (bounds, objects);
 		}
 
 		currentMenu = triviaRound;
@@ -1489,6 +1489,13 @@ public class UIManager : MonoBehaviour
 			"Syncing results",
 			"Syncing results"
 		});
+
+		// Make sure the client accepts the server's game piece positions
+		if (gameLogic.currentlyNetworking () && !gameLogic.isServer) {
+			objects [0].transform.position = gameLogic.theirGamestate.swordPos;
+			objects [1].transform.position = gameLogic.theirGamestate.shieldPos;
+			objects [2].transform.position = gameLogic.theirGamestate.starPos;
+		}
 
 		if (slider.value <= 0) {
 			if (gameLogic.currentlyNetworking () && !gameLogic.isServer) {
