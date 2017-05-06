@@ -176,7 +176,6 @@ public class GameLogicManager : MonoBehaviour
 					initialSetupComplete = true;
 					updatePlayerPrefs ();
 					getPlayerPrefs ();
-					updateShuffledAnswers ();
 				}
 			}
 		}

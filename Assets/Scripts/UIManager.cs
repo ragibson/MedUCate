@@ -228,7 +228,7 @@ public class UIManager : MonoBehaviour
 			"REVIEW QUESTIONS >>>",
 			"<<< BACK TO MENU"
 		});
-		setButtonBehaviors (new Action[] { changeQuestions, addQuestions, reviewQuestions, mainMenu });
+		setButtonBehaviors (new Action[] { changeQuestions, addQuestions, loadReviewQuestions, mainMenu });
 
 		setDisplayImage (images [3]);
 		setDisplayColor (Color.blue);
@@ -1138,6 +1138,15 @@ public class UIManager : MonoBehaviour
 		String.Format ("(SET {0} OF {1})", gameLogic.setToChange + 1, gameLogic.questionSets.Count));
 
 		currentMenu = changeQuestions;
+	}
+
+	/*
+	 * 	Make sure that the answers are updated for the current question
+	 * 	before proceeding to the review questions menu.
+	 */
+	void loadReviewQuestions() {
+		gameLogic.updateShuffledAnswers ();
+		currentMenu = reviewQuestions;
 	}
 
 	void reviewQuestions ()
