@@ -11,7 +11,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 <a name = "TODO"></a>
 ## TODO
   * General
-    * Review Questions menu needs to take the form "Set name; Question # of # - ...; Correct Answer - ...; Other Answers - ...;"
     * Vertically center text on all menus?
     * Text input field should delete everything when clicked on and have centered default text, if possible.
     * Singleplayer quickplay menu should have (option # of #) removed.

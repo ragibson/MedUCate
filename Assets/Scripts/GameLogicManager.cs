@@ -50,6 +50,7 @@ public class GameLogicManager : MonoBehaviour
 	// === Profile Review Questions === //
 	public int currentQuestion = 0;
 	public bool hideAnswers = false;
+	public string[] shuffledAnswers;
 
 	// ===   Campaign High Scores   === //
 	public string gameMode = "";
@@ -175,6 +176,7 @@ public class GameLogicManager : MonoBehaviour
 					initialSetupComplete = true;
 					updatePlayerPrefs ();
 					getPlayerPrefs ();
+					updateShuffledAnswers ();
 				}
 			}
 		}
@@ -234,6 +236,16 @@ public class GameLogicManager : MonoBehaviour
 		updatePlayerPrefs ();
 
 		return true;
+	}
+
+	/*
+	 * 	Updates the shuffledAnswers array for use in the review questions menu
+	 * 
+	 * 	This is called when the user switches between questions
+	 */
+	public void updateShuffledAnswers ()
+	{
+		shuffledAnswers = getCurrentQuestion ().shuffledAnswers ();
 	}
 
 	public string getCampaignScore (int level)
@@ -657,6 +669,7 @@ public class GameLogicManager : MonoBehaviour
 	{
 		currentQuestion += 1;
 		currentQuestion %= questionSets [selectedSet].numberOfQuestions ();
+		updateShuffledAnswers ();
 	}
 
 	public void decreaseCurrentQuestion ()
@@ -664,6 +677,7 @@ public class GameLogicManager : MonoBehaviour
 		//	This is equivalent to subtracting 1 modulo Length
 		currentQuestion += questionSets [selectedSet].numberOfQuestions () - 1;
 		currentQuestion %= questionSets [selectedSet].numberOfQuestions ();
+		updateShuffledAnswers ();
 	}
 
 	public Question getCurrentQuestion ()

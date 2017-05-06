@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System;
+using System.Text.RegularExpressions;
 
 public class UIManager : MonoBehaviour
 {
@@ -1110,12 +1111,12 @@ public class UIManager : MonoBehaviour
 
 	void reviewQuestions ()
 	{
-		string hideOrShow = "HIDE";
+		string hideOrShow = "HIDE INCORRECT ANSWERS";
 		if (gameLogic.hideAnswers) {
-			hideOrShow = "SHOW";
+			hideOrShow = "SHOW ALL ANSWERS";
 		}
 
-		setButtonsText (new string[] { String.Format ("<<< {0} ANSWER >>>", hideOrShow),
+		setButtonsText (new string[] { String.Format ("<<< {0} >>>", hideOrShow),
 			"CHANGE QUESTION >>>", 
 			"<<< CHANGE QUESTION",
 			"<<< BACK TO PROFILE"
@@ -1130,18 +1131,40 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 
-		string text = "MAIN MENU > PROFILE > REVIEW\n\n" +
-		              "CURRENTLY SELECTED SET NAME -\n" +
-		              settings.selected.setName +
-		              "\n\nQUESTION -\n" +
+		string text = settings.selected.setName +
+		              String.Format ("\n\nQUESTION {0} OF {1} -\n", gameLogic.currentQuestion + 1,
+			              gameLogic.getSetToChange ().numberOfQuestions ()) +
 		              gameLogic.getCurrentQuestion ().questionText +
 		              "\n\n";
-		if (!gameLogic.hideAnswers) {
-			text += "CORRECT ANSWER -\n" +
-			gameLogic.getCurrentQuestion ().correctAnswer;
+		
+		text += "ANSWER CHOICES -";
+
+		int answerCount = 1;
+		foreach (string s in gameLogic.shuffledAnswers) {
+
+			// We won't display blank answer choices.
+			if (!String.IsNullOrEmpty (s)) {
+				
+				if (String.Equals (s, gameLogic.getCurrentQuestion ().correctAnswer)) {
+					text += "\n" + answerCount + ") " + s;
+				} else {
+					if (gameLogic.hideAnswers) {
+						/*
+						 * 	If we're showing the correct answer, we'll hide the incorrect
+						 * 	ones with asterisks.
+						 * 
+						 * 	We need to keep the spaces to ensure consistent formatting in
+						 * 	Unity's text element.
+						 */
+						text += "\n" + answerCount + ") " + new Regex("\\S").Replace(s, "*");
+					} else {
+						text += "\n" + answerCount + ") " + s;
+					}
+				}
+
+				answerCount += 1;
+			}
 		}
-		text += String.Format ("\n\n(QUESTION {0} OF {1})", gameLogic.currentQuestion + 1,
-			gameLogic.getSetToChange ().numberOfQuestions ());
 
 		setDisplayText (text);
 
