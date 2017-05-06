@@ -1,67 +1,94 @@
 body {
-    margin: 0;
+	margin: 0;
 }
 .MeducateTitleBar {
-    overflow: hidden;
-    background-color: #7BAFD4;
-    color: white;
-    margin: 0;
-    height: 100px;
+	overflow: hidden;
+	background-color: #7BAFD4;
+	color: white;
+	margin: 0;
+	height: 100px;
 }
 .MeducateTitleBar h1 {
-    font-size: 40px;
-    text-align: center;
-    vertical-align: middle;
+	font-size: 40px;
+	text-align: center;
+	vertical-align: middle;
 }
 .topnav {
-    overflow: hidden;
-    background-color: #333;
-    font-size: 20px;
+	overflow: hidden;
+	background-color: #333;
+	font-size: 20px;
 }
 .topnav a {
-    float: left;
-    display: block;
-    color: #f2f2f2;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
+	float: left;
+	display: block;
+	color: #f2f2f2;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-size: 17px;
 }
 .topnav a:hover {
-    background-color: #ddd;
-    color: black;
+	background-color: #ddd;
+	color: black;
 }
 .topnav a.active {
-    background-color: #4CAF50;
-    color: white;
+	background-color: #4CAF50;
+	color: white;
 }
 .mainDisplay {
-    padding=0px;
+	padding=0px;
 }
 .pageContents {
-    padding-left: 16px;
+	padding-left: 16px;
 }
 #ExcelTutorialBar {
-    background-color: #008000;
-    color: white;
-    height: 60px;
-    width: 70%;
-    font-size: 20px;
-    padding: 14px 16px;
-    margin: 0;
+	background-color: #008000;
+	color: white;
+	height: 60px;
+	width: 70%;
+	font-size: 20px;
+	padding: 14px 16px;
+	margin: 0;
 }
 #ExcelTutorialContents {
-    padding-left: 16px;
+	padding-left: 16px;
+}
+.TutorialNavigationBar {
+	width: 70%;
+	margin: 0;
+	overflow: hidden;
+	font-size: 18px;
+}
+.TutorialNavigationBar a {
+	float: left;
+	text-align: center;
+	padding: 2% 5%;
+	text-decoration: none;
+	font-size: 17px;
+	background-color: #F5F5F5;
+	color: black;
+}
+.TutorialNavigationBar a:hover {
+	background-color: #66b3ff;
+	color: #ffffff;
+}
+.TutorialNavigationBar a.CurrentSection {
+	background-color: #E0E0E0;
+	color: black;
 }
 #UploadCenterBar {
-    background-color: red;
-    color: white;
-    height: 60px;
-    width: 70%;
-    font-size: 20px;
-    padding: 14px 16px;
-    margin: 0;
+	background-color: red;
+	color: white;
+	height: 60px;
+	width: 70%;
+	font-size: 20px;
+	padding: 14px 16px;
+	margin: 0;
 }
 #UploadCenter {
-    padding-left: 16px;
+	padding-left: 16px;
+}
+img {
+	display: block;
+	margin: auto;
 }

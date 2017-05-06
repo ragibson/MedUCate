@@ -1,61 +1,155 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <link rel="stylesheet" href="style.css">
+	<link href="style.css" rel="stylesheet">
+	<title></title>
 </head>
-
 <body>
-
-    <div class="MeducateTitleBar">
-        <h1>Meducate</h1>
-    </div>
-
-    <div class="topnav">
-        <a href="index.html">Home</a>
-        <a class="active" href="#addQuestions">Add Questions</a>
-        <a href="#contact">Contact</a>
-        <a href="#about">About</a>
-
-    </div>
-
-    <div class="mainDisplay">
-        <div class="pageContents">
-            <h2>You have reached the "Add Question" section of our website.</h2>
-            <p>This page contains our upload center and a tutorial on how to use our *FREE* Excel question creation <a href="TemplateSheet.xlsm" download>tool available here for download</a>.
-                <br>The file will be named "QuestionsToAdd.csv" and will be found in "C:\CSVToAdd" (NOTE: this directory must be created prior to running our tool)
-                <br>Please check below for a tutorial on how to use <a href="TemplateSheet.xlsm" download> our free Excel question creation tool</a>
-            </p>
-        </div>
-        <div class="uploadSection">
-
-            <div id="UploadCenterBar">
-                <h2>Upload Center</h2>
-            </div>
-
-            <div id="UploadCenter">
-                <p>
-                    If you have already used our tool, and have your questions prepared, please click on the button below and navigate to the file on your system.
-                </p>
-                <form method="POST" enctype="multipart/form-data" action="upload.php">
-                    <input type="file" name="fileToUpload">
-                    <input type="submit" name="submit" value="Upload Now">
-                </form>
-                </br>
-            </div>
-        </div>
-
-        <div class="ExcelQuestionTutorial">
-            <div id="ExcelTutorialBar">
-                <h2><i>Tutorial:</i> Excel Question Creation Tool</h2>
-            </div>
-            <div id="ExcelTutorialContents">
-                <p>
-                    <i><b>Coming soon: Tutorial for using Excel Template Tool</b></i>
-                </p>
-            </div>
-        </div>
-    </div>
+	<a id="Top" name="Top"></a>
+	<div class="MeducateTitleBar">
+		<h1>Meducate</h1>
+	</div>
+	<div class="topnav">
+		<a href="index.html">Home</a> <a class="active" href="#addQuestions">Add Questions</a> <a href="Contact.html">Contact</a> <a href="About.html">About</a>
+	</div>
+	<div class="mainDisplay">
+		<div class="pageContents">
+			<h2>You have reached the "Add Question" section of our website.</h2>
+			<p>This page contains our upload center and a tutorial on how to use our *FREE* Excel question creation <a href="ExcelQuestionCreationTool.xlsm">tool available here for download</a>.<br>
+			The file will be named "QuestionsToAdd.csv" and will be found in "C:\CSVToAdd" (NOTE: this directory must be created prior to running our tool)<br>
+			Please <a href="#Tutorial">check below for a tutorial</a> on how to use <a href="ExcelQuestionCreationTool.xlsm">our free Excel question creation tool</a></p>
+		</div><a id="uploadSection" name="uploadSection"></a>
+		<div class="uploadSection">
+			<div id="UploadCenterBar">
+				<h2>Upload Center</h2>
+			</div>
+			<div id="UploadCenter">
+				<p>If you have already used our tool, and have your questions prepared, please click on the button below and navigate to the file on your system.</p>
+				<form action="upload.php" enctype="multipart/form-data" method="post">
+					<input name="fileToUpload" type="file"> <input name="submit" type="submit" value="Upload Now">
+				</form><br>
+			</div>
+		</div><a id="Tutorial" name="Tutorial"></a>
+		<div class="ExcelQuestionTutorial">
+			<div id="ExcelTutorialBar">
+				<h2><i>Tutorial:</i> Excel Question Creation Tool</h2>
+			</div>
+			<div id="ExcelTutorialContents">
+				<p></p>
+				<h2>Welcome to the Excel Question Creation tutorial. This tutorial is comprised of three<br>
+				sections to guide you through preparing your computer, using our tool, and uploading<br>
+				your questionset.</h2><a id="Task1" name="Task1"></a>
+				<div class="TutorialNavigationBar">
+					<a class="CurrentSection" href="#Task1"><b>Task 1:</b><br>
+					Preparing your computer</a> <a href="#Task2"><b>Task 2:</b><br>
+					Downloading and using our tool</a> <a href="#Task3"><b>Task 3:</b><br>
+					Uploading formatted questions</a>
+				</div>
+				<h2>Task 1: Preparing your computer</h2>
+				<h3>The first task to get started is to create the folder that our tool will use to store the file for you to upload.</h3>Start by navigating to your "C" drive in your computer's file explorer.<br>
+				<br>
+				<img alt="C_Drive" src="Pic001_C_Drive.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Then, create a new folder my right clicking inside the "C" drive and mousing to "new" then "folder"<br>
+				<br>
+				<img alt="C_Drive" src="Pic002_NewFolder.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Now, rename this folder to "CSVToAdd"<br>
+				<br>
+				<img alt="C_Drive" src="Pic003_NameFolderCSVToAdd.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Congratulations, you have now created the folder needed to get started!<br>
+				<br>
+				<br>
+				<a id="Task2" name="Task2"></a>
+				<div class="TutorialNavigationBar">
+					<a href="#Task1"><b>Task 1:</b><br>
+					Preparing your computer</a> <a class="CurrentSection" href="#Task2"><b>Task 2:</b><br>
+					Downloading and using our tool</a> <a href="#Task3"><b>Task 3:</b><br>
+					Uploading formatted questions</a>
+				</div>
+				<h2>Task 2: Downloading and using our tool</h2>
+				<h3>The next task on our list will be downloading and using the tool.</h3><br>
+				Start by clicking on the link to our tool at the top of the webpage.<br>
+				<br>
+				<img alt="C_Drive" src="Pic004_DownloadFile.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Now, open up the file you downloaded to get started.<br>
+				<br>
+				<img alt="C_Drive" src="Pic005_OpenExcelTool.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				To add more questions to the list, click the "Add" button<br>
+				<br>
+				<img alt="C_Drive" src="Pic006_AddMoreQuestions1.png" style="width:500px;height:400px;"> <img alt="C_Drive" src="Pic007_AddMoreQuestion2.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				To remove questions, click the "Remove" button<br>
+				<br>
+				<img alt="C_Drive" src="Pic008_RemoveQuestions1.png" style="width:500px;height:400px;"> <img alt="C_Drive" src="Pic009_RemoveQuestions2.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Type your questions into the blanks as specified in the examples. When you are done, click the "Add Question" button<br>
+				<br>
+				<img alt="C_Drive" src="Pic010_CreateUploadMacroPress.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				If you have used our tool before, make sure to click "Yes" when it asks if you would like to replace your old file<br>
+				<br>
+				<img alt="C_Drive" src="Pic011_OverWriteOld.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Close out of excel. Congratulations, you are now finished using the Excel Question Creation Tool!<br>
+				<br>
+				<br>
+				<a id="Task3" name="Task3"></a>
+				<div class="TutorialNavigationBar">
+					<a href="#Task1"><b>Task 1:</b><br>
+					Preparing your computer</a> <a href="#Task2"><b>Task 2:</b><br>
+					Downloading and using our tool</a> <a class="CurrentSection" href="#Task3"><b>Task 3:</b><br>
+					Uploading formatted questions</a>
+				</div>
+				<h2>Task 3: Uploading formatted questions</h2>
+				<h3>The final task is to upload your new file to our server.</h3><br>
+				On our webpage, navigate to the <a href="#uploadSection">Upload Center</a> and click on "Choose File"<br>
+				<br>
+				<img alt="C_Drive" src="Pic012_ClickChooseFile.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Navigate to the "C" drive<br>
+				<br>
+				<img alt="C_Drive" src="Pic013_NavigateChooseFile.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Now open the "CSVToAdd" Folder we created earlier.<br>
+				<br>
+				<img alt="C_Drive" src="Pic014_GoToCreatedFolder.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Here you will find the correctly formatted question set that you created, double click on the "QuestionsToAdd.csv" file to select it.<br>
+				<br>
+				<img alt="C_Drive" src="Pic015_ChooseFile.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Click "Open" once the file is selected.<br>
+				<br>
+				<img alt="C_Drive" src="Pic016_ConfirmFile.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				Now, hit the "Upload Now" button in the Upload Center.<br>
+				<br>
+				<img alt="C_Drive" src="Pic017_ClickUpload.png" style="width:500px;height:400px;"><br>
+				<br>
+				<br>
+				You should be brought to a page saying "The file QuestionsToAdd.csv has been uploaded".<br>
+				<h3>Congratulations! You are now done with all tasks. We have received your question set and will add it to the game as soon as we can.</h3><a href="#Top">Back to top of page</a>
+				<p></p>
+			</div>
+		</div>
+	</div>
 </body>
-
 </html>
