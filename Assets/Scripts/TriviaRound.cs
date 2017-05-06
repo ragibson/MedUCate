@@ -19,6 +19,13 @@ public class TriviaRound
 
 	public bool proceedToCombat = false;
 
+	/*
+	 * 	If the player does not answer at all or answers with less
+	 * 	than 3 seconds left, we give them some extra time to read
+	 * 	the results of the round
+	 */
+	public bool addedExtraTime = false;
+
 	GameLogicManager gameLogic;
 
 	public TriviaRound (float secondsPerRound, Question question, string[] responses, string correctResponse, int roundNumber)
@@ -37,8 +44,6 @@ public class TriviaRound
 		 */
 		answerTime = roundTime;
 	}
-
-	bool addedExtraTime = false;
 
 	public void Update ()
 	{

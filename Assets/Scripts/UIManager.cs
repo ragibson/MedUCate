@@ -1337,8 +1337,16 @@ public class UIManager : MonoBehaviour
 	{
 		game.currentTriviaRound.Update ();
 
-		slider.value = game.currentTriviaRound.timeRemaining ();
-		slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+		/*
+		 * 	If we add extra time, don't change the slider value.
+		 * 	
+		 * 	Otherwise, the slider will "jump" back three seconds once
+		 * 	it hits zero.
+		 */
+		if (!game.currentTriviaRound.addedExtraTime) {
+			slider.value = game.currentTriviaRound.timeRemaining ();
+			slider.GetComponentInChildren<Text> ().text = "" + (int)slider.value;
+		}
 
 		setButtonsText (game.currentTriviaRound.answers);
 		setButtonBehaviors (new Action[] {
@@ -1362,7 +1370,18 @@ public class UIManager : MonoBehaviour
 			}
 		}
 
-		setDisplayText (game.textToDisplay ());
+		/*
+		 * 	If we needed to add extra time to allow players to read the results of the round,
+		 * 	add a countdown to the bottom of the primary display.
+		 */
+		string text = game.textToDisplay ();
+		if (game.currentTriviaRound.addedExtraTime) {
+			int timeLeft = (int)Math.Round (game.currentTriviaRound.timeRemaining ());
+			text += String.Format ("\n\nCONTINUING IN {0} SECOND{1}...", timeLeft, 
+				(timeLeft == 1) ? "" : "S");
+		}
+
+		setDisplayText (text);
 
 		currentMenu = triviaRound;
 
