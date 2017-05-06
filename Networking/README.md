@@ -59,7 +59,7 @@ If this game is ever available on a public server, a hash should be added to the
 
 The specifics of the website setup are yours to change.
 
-Our example website prototype is in this Networking directory: [AddQuestions.html](AddQuestions.html), [index.html](index.html), [style.css](style.css), [upload.php](upload.php).
+Our example website prototype is in this Networking directory: [AddQuestions.html](AddQuestions.html), [index.html](index.html), [style.css](style.css), [upload.php](upload.php). The pictures for the website have to be in the same directory as the other files, but are placed in the [Pictures](Pictures) folder here to avoid clutter.
 
 Our upload php script places the uploaded .csv files into the "DocumentRoot/uploads" folder, which will then have to be manually curated and placed into the "DocumentRoot/sets" folder in order to be used in game.
 
