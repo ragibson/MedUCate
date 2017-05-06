@@ -1144,7 +1144,8 @@ public class UIManager : MonoBehaviour
 	 * 	Make sure that the answers are updated for the current question
 	 * 	before proceeding to the review questions menu.
 	 */
-	void loadReviewQuestions() {
+	void loadReviewQuestions ()
+	{
 		gameLogic.updateShuffledAnswers ();
 		currentMenu = reviewQuestions;
 	}
@@ -1487,8 +1488,6 @@ public class UIManager : MonoBehaviour
 			// This calculates damageDealt, damageBlocked
 			game.currentCombatRound.damageCalc (objects [0], objects [1], objects [2], out damageDealt, out damageBlocked);
 
-
-
 			if (game.currentTriviaRound.playerAttacks (computer)) {
 				game.dealDamage (0, damageDealt - damageBlocked);
 			} else {
@@ -1503,6 +1502,10 @@ public class UIManager : MonoBehaviour
 
 					gameLogic.theirGamestate.RpcUpdateDamageDealt (damageDealt);
 					gameLogic.theirGamestate.RpcUpdateDamageBlocked (damageBlocked);
+
+					gameLogic.theirGamestate.RpcSwordPosition (objects [0].transform.position);
+					gameLogic.theirGamestate.RpcShieldPosition (objects [1].transform.position);
+					gameLogic.theirGamestate.RpcStarPosition (objects [2].transform.position);
 				}
 
 				slider.value = gameLogic.gameSyncTime;
@@ -1534,11 +1537,19 @@ public class UIManager : MonoBehaviour
 			"Syncing results"
 		});
 
-		// Make sure the client accepts the server's game piece positions
+		/*
+		 * 	Make sure the client accepts the server's game piece positions
+		 * 
+		 * 	This will cause some strange piece movement on the client's end
+		 * 	if the server and client disagree (i.e. if the client manages to
+		 * 	move his/her game piece after the server thinks the round has
+		 * 	already finished, the client's game piece will snap back to its
+		 * 	position from a fraction of a second prior).
+		 */
 		if (gameLogic.currentlyNetworking () && !gameLogic.isServer) {
-			objects [0].transform.position = gameLogic.theirGamestate.swordPos;
-			objects [1].transform.position = gameLogic.theirGamestate.shieldPos;
-			objects [2].transform.position = gameLogic.theirGamestate.starPos;
+			gameLogic.ourGamestate.swordPos = gameLogic.theirGamestate.swordPos;
+			gameLogic.ourGamestate.shieldPos = gameLogic.theirGamestate.shieldPos;
+			gameLogic.ourGamestate.starPos = gameLogic.theirGamestate.starPos;
 		}
 
 		if (slider.value <= 0) {
