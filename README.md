@@ -33,6 +33,12 @@ To reduce some audio decoding delay on mobile devices, change
 
 to "Best latency".
 
+To reduce some artifacting on specific game textures, uncheck
+
+    Image > Import Settings > Generate Mip Maps
+
+and alter the "Filter Mode" settings as desired.
+
 <a name = "Networking"></a>
 ## Networking Setup
 Instructions for setting up the game's networking can be found [here](Networking/README.md).
