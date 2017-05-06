@@ -863,7 +863,7 @@ public class UIManager : MonoBehaviour
 
 		// If we wait too long, we'll play against an AI
 		if (currentMultiplayerWaitTime > timeToWaitUntilRandomAI) {
-			slider.value = 5;
+			slider.value = gameLogic.secondsPerRound / 2;
 			currentMenu = closeNetworkingThenAIGame;
 		} else {
 			currentMenu = multiPlayerQuickPlayWaitForGame;
@@ -1326,7 +1326,7 @@ public class UIManager : MonoBehaviour
 		setDisplayText (gameLogic.displayText);
 
 		if (slider.value <= 0) {
-			slider.value = game.roundTime / 2;
+			slider.value = game.roundTime / 4;
 			slider.GetComponentInChildren<Text> ().text = "" + 0;
 			objectVisibility (false, false, false);
 			currentMenu = mainMenu;
@@ -1444,7 +1444,7 @@ public class UIManager : MonoBehaviour
 				slider.value = gameLogic.gameSyncTime;
 				currentMenu = multiplayerCombatResultsSyncTime;
 			} else {
-				slider.value = game.roundTime / 2;
+				slider.value = game.roundTime / 4;
 
 				// Play a sword clash sound effect when objects appear
 				soundEffects.swordClashSound ();
@@ -1480,7 +1480,7 @@ public class UIManager : MonoBehaviour
 				damageBlocked = gameLogic.ourGamestate.damageBlocked;
 			}
 
-			slider.value = game.roundTime / 2;
+			slider.value = game.roundTime / 4;
 			objectVisibility (true, true, true);
 
 			// Play a sword clash sound effect when objects appear
@@ -1541,7 +1541,7 @@ public class UIManager : MonoBehaviour
 	// Wipe all saved user data for debugging (see GameLogicManager)
 	public void debugWipeAllSettings ()
 	{
-		slider.value = 10;
+		slider.value = gameLogic.secondsPerRound;
 		currentMenu = wipeSettingsVerification;
 	}
 
@@ -1561,7 +1561,7 @@ public class UIManager : MonoBehaviour
 		if (slider.value > 0) {
 			currentMenu = wipeSettingsVerification;
 		} else {
-			slider.value = 5;
+			slider.value = gameLogic.secondsPerRound / 2;
 			gameLogic.deleteAllPrefs ();
 			currentMenu = mainMenu;
 		}

@@ -11,7 +11,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 <a name = "TODO"></a>
 ## TODO
   * General
-    * Combat time should be reduced to 5 seconds, results to 2.5 seconds (preferably, roundTime/2 and roundTime/4, respectively).
     * Slider should maintain at zero after adding extra time in a trivia round.
     * Slider max value should be set to round start time to have the slider visually start at the far right of the screen in all cases.
     * Usernames should be unique.

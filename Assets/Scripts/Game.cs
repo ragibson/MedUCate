@@ -134,7 +134,7 @@ public class Game
 
 	public void nextCombat ()
 	{
-		currentCombatRound = new CombatRound (roundTime, damage, playerHealth, enemyHealth);
+		currentCombatRound = new CombatRound (roundTime / 2, damage, playerHealth, enemyHealth);
 	}
 
 	public void dealDamage (int player, int enemy)
