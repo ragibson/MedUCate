@@ -9,7 +9,13 @@ public class UIManager : MonoBehaviour
 
 	public string addScoreURL = "http://meducate.cs.unc.edu/addscore.php";
 	public string highscoreURL = "http://meducate.cs.unc.edu/display.php";
+	public string uniqueUsernameURL = "http://meducate.cs.unc.edu/uniqueUsername.php";
+
+	// Leaderboard text, updated by web request
 	public string Scores;
+
+	// Username update text, updated by web request
+	public string usernameWaitText;
 
 	private Settings settings;
 	private ComputerPlayer computer;
@@ -253,7 +259,7 @@ public class UIManager : MonoBehaviour
 			"<<< Use as new Username >>>",
 			"<<< BACK TO PROFILE"
 		});
-		setButtonBehaviors (new Action[] { addThisSet, removeThisSet, changeUsername, profile });
+		setButtonBehaviors (new Action[] { addThisSet, removeThisSet, requestNewUserName, profile });
 
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
@@ -268,6 +274,37 @@ public class UIManager : MonoBehaviour
 		gameLogic.inputfield.SetActive (true);
 
 		currentMenu = addQuestions;
+	}
+
+	void requestNewUserName ()
+	{
+		setDisplayImage (images [5]);
+		setDisplayColor (Color.blue);
+		StartCoroutine (newUsername (gameLogic.inputfield.GetComponentInChildren<InputField> ().text));
+		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Waiting for server...";
+		currentMenu = addQuestions;
+	}
+
+	// Checks whether the username is already taken on the server
+	IEnumerator newUsername (string desiredName)
+	{
+		// Usernames are stored in uppercase
+		desiredName = desiredName.ToUpper ();
+		WWW name_get = new WWW (uniqueUsernameURL + "?name=" + WWW.EscapeURL (desiredName));
+		yield return name_get;
+
+		if (name_get.error != null) {
+			gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Cannot access server...";
+		} else {
+			if (String.Equals (name_get.text, "name already exists\n")) {
+				gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Username already taken!";
+			} else if (String.Equals (name_get.text, "username updated\n")) {
+				gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Updated Username!";
+				changeUsername (desiredName);
+			} else {
+				gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Cannot access server...";
+			}
+		} 
 	}
 
 	void addThisSet ()
@@ -302,14 +339,13 @@ public class UIManager : MonoBehaviour
 		currentMenu = addQuestions;
 	}
 
-	// Converts input field to all capital letters before changing the username
-	void changeUsername ()
+	// Converts input to all capital letters before changing the username
+	void changeUsername (string newName)
 	{
-		string newName = gameLogic.inputfield.GetComponentInChildren<InputField> ().text;
 		gameLogic.username = newName.ToUpper ();
 
 		gameLogic.updatePlayerPrefs ();
-		gameLogic.inputfield.GetComponentInChildren<InputField> ().text = "Updated Username!";
+		StartCoroutine (PostScores (gameLogic.username, gameLogic.reputation));
 
 		currentMenu = addQuestions;
 	}

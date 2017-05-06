@@ -3,15 +3,9 @@
 A trivia/learning game created for a client as the primary project of COMP 585H at UNC-Chapel Hill.
 
 # Table of Contents
-  * [TODO](#TODO)
   * [Requirements](#Requirements)
   * [Installation](#Installation)
   * [Networking Setup](#Networking)
-
-<a name = "TODO"></a>
-## TODO
-  * General
-    * Usernames should be unique.
 
 <a name = "Requirements"></a>
 ## Requirements

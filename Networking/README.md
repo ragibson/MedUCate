@@ -46,9 +46,9 @@ The game currently looks for the following default question sets:
 
 First, create a mysql database and a table to hold leaderboard scores (e.g. create the database meducate and the table scores).
 
-Then, place the addscore.php and display.php scripts in "DocumentRoot/html" and update the $username, $password, $database values in these scripts to match your setup.
+Then, place the [addscore.php](addscore.php), [display.php](display.php), and [uniqueUsername.php](uniqueUsername.php) scripts in "DocumentRoot/html" and update the $username, $password, $database values in these scripts to match your setup.
 
-Finally, update the addScoreURL and highScoreURL in [UIManager.cs](../Assets/Scripts/UIManager.cs) and the leaderboard will work with the game.
+Finally, update the addScoreURL, highScoreURL, and uniqueUsernameURL in [UIManager.cs](../Assets/Scripts/UIManager.cs) and the leaderboard will work with the game.
 
 The leaderboard currently shows the top five players in the game, but this can by easily changed in [display.php](display.php)
 
