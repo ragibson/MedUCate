@@ -1362,7 +1362,7 @@ public class UIManager : MonoBehaviour
 		setDisplayText (gameLogic.displayText);
 
 		if (slider.value <= 0) {
-			slider.value = game.roundTime / 4;
+			slider.value = game.roundTime / 2;
 			slider.GetComponentInChildren<Text> ().text = "" + 0;
 			objectVisibility (false, false, false);
 			currentMenu = mainMenu;
