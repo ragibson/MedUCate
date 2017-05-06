@@ -433,6 +433,8 @@ public class GameLogicManager : MonoBehaviour
 	 * 	One Many Army awards and detracts reputation based on wager and win/loss result.
 	 * 
 	 * 	Single Player Quick Play awards 10-50 reputation on win, depending on level.
+	 * 
+	 * 	Multiplayer gives 100 reputation on win.
 	 */
 	public string changeReputation (float finalHP = 0)
 	{
@@ -457,6 +459,11 @@ public class GameLogicManager : MonoBehaviour
 			if (finalHP > 0) {
 				int level = 3 * computer.difficulty + computer.speed;
 				reputationChange += 5 * (2 + level);
+			}
+		} else if (String.Equals (this.gameMode, "Multiplayer Quick Play AI") ||
+		           String.Equals (this.gameMode, "Multiplayer Quick Play")) {
+			if (finalHP > 0) {
+				reputationChange = 100;
 			}
 		}
 

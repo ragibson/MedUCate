@@ -12,7 +12,6 @@ A trivia/learning game created for a client as the primary project of COMP 585H 
 ## TODO
   * General
     * Usernames should be unique.
-    * Multiplayer add +100 reputation on game win.
 
 <a name = "Requirements"></a>
 ## Requirements

@@ -195,10 +195,10 @@ public class UIManager : MonoBehaviour
 	{
 		setButtonsText (new string[] { "QUICK PLAY >>>",
 			"ONE MAN ARMY >>>",
-			"",
+			"<<< SHOW LEADERBOARD >>>",
 			"<<< BACK TO MENU"
 		});
-		setButtonBehaviors (new Action[] { multiPlayerQuickPlay, multiPlayerOneManArmy, noMenu, mainMenu });
+		setButtonBehaviors (new Action[] { multiPlayerQuickPlay, multiPlayerOneManArmy, leaderboardLoad, mainMenu });
 
 		setDisplayImage (images [2]);
 		setDisplayColor (Color.red);
@@ -983,14 +983,14 @@ public class UIManager : MonoBehaviour
 		}
 
 		setButtonsText (new string[] { startGameText,
-			"<<< SHOW LEADERBOARD >>>", 
-			"CHANGE WAGER >>>",
+			"CHANGE WAGER >>>", 
+			"",
 			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
 			oneManArmyStartGame,
-			leaderboardLoad,
 			settings.changeWager,
+			noMenu,
 			multiPlayer
 		});
 
@@ -1001,8 +1001,7 @@ public class UIManager : MonoBehaviour
 		settings.selected.setName +
 		"\n\n" +
 		"CURRENT REPUTATION -\n" +
-		String.Format ("{0}\n", gameLogic.reputation) +
-		"(THIS CHANGES AS YOU PLAY MORE GAMES)\n\n" +
+		String.Format ("{0}\n\n", gameLogic.reputation) +
 		"CURRENT WAGER -\n" +
 		settings.getWagerString () +
 		String.Format ("\n(OPTION {0} OF {1})", settings.wagerIndex + 1, settings.wagers.Length));
@@ -1037,15 +1036,15 @@ public class UIManager : MonoBehaviour
 		setButtonsText (new string[] { "",
 			"", 
 			"",
-			"<<< BACK TO ONE MAN ARMY"
+			"<<< BACK TO MULTIPLAYER"
 		});
 		setButtonBehaviors (new Action[] {
 			noMenu,
 			noMenu,
 			noMenu,
-			multiPlayerOneManArmy
+			multiPlayer
 		});
-		setDisplayText (Scores);
+		setDisplayText (Scores + "\n\nYOUR REPUTATION: " + gameLogic.reputation);
 	}
 
 	// Send scores to leaderboard

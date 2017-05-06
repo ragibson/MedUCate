@@ -18,7 +18,7 @@
     $result = $sth->fetchAll();
 
     if(count($result) > 0) {
-        echo "ONE MAN ARMY LEADERBOARD", "\n", "\n";
+        echo "LEADERBOARD", "\n", "\n";
         echo "Player  -  Reputation", "\n", "\n";
         foreach($result as $r) {
             echo $r['name'], "\t -  ", $r['score'], "\n";
