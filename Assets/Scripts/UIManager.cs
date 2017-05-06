@@ -335,10 +335,8 @@ public class UIManager : MonoBehaviour
 		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
 		"CURRENT DIFFICULTY -\n" +
 		computer.getDifficultyString () +
-		String.Format ("\n(OPTION {0} OF {1})\n\n", computer.difficulty + 1, computer.difficulties.Length) +
-		"CURRENT OPPONENT SPEED -\n" +
-		computer.getSpeedString () +
-		String.Format ("\n(OPTION {0} OF {1})", computer.speed + 1, computer.speeds.Length));
+		"\n\nCURRENT OPPONENT SPEED -\n" +
+		computer.getSpeedString ());
 
 		currentMenu = singlePlayerQuickPlay;
 	}
@@ -631,12 +629,10 @@ public class UIManager : MonoBehaviour
 		"CURRENT QUESTIONS -\n" +
 		settings.selected.setName +
 		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
-		"CURRENT LEVEL -\n" +
+		String.Format ("LEVEL {0} of {1} -\n", computer.level + 1, computer.numberOfLevels ()) +
 		computer.getLevelString () +
-		String.Format ("\n(OPTION {0} OF {1})\n\n", computer.level + 1, computer.numberOfLevels ()) +
-		"LEVEL STATUS -\n" +
-		gameLogic.getCampaignScore (computer.level) +
-		"\n(THERE ARE 9 LEVELS TOTAL)");
+		"\n\nLEVEL STATUS -\n" +
+		gameLogic.getCampaignScore (computer.level));
 
 		currentMenu = singlePlayerCampaign;
 	}
@@ -669,12 +665,11 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > MULTIPLAYER > QUICK PLAY\n\n" +
-		"CURRENT QUESTIONS -\n" +
+		"CURRENT QUESTION SET -\n" +
 		settings.selected.setName +
-		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
-		"CURRENT MODE -\n" +
-		settings.getMultiPlayerModeString () +
-		String.Format ("\n(OPTION {0} OF {1})\n\n", settings.multiplayerMode + 1, settings.multiplayerModes.Length));
+		"\n(GO TO PROFILE TO SELECT A DIFFERENT SET)\n\n" +
+		"BOTH PLAYER'S WILL USE THE HOST'S\n" +
+		"SELECTED QUESTION SET");
 
 		currentMenu = multiPlayerQuickPlay;
 	}
@@ -715,9 +710,9 @@ public class UIManager : MonoBehaviour
 		setDisplayImage (images [5]);
 		setDisplayColor (Color.blue);
 		setDisplayText ("MAIN MENU > MULTIPLAYER > QUICK PLAY > HOST GAME\n\n" +
-		"CURRENT QUESTIONS -\n" +
+		"CURRENT QUESTION SET -\n" +
 		settings.selected.setName +
-		"\n(GO TO PROFILE TO CHANGE QUESTIONS)\n\n" +
+		"\n(GO TO PROFILE TO SELECT A DIFFERENT SET)\n\n" +
 		"ROOM NAME:\n" + gameLogic.roomName);
 
 		currentMenu = multiPlayerHostGame;
@@ -1156,7 +1151,7 @@ public class UIManager : MonoBehaviour
 						 * 	We need to keep the spaces to ensure consistent formatting in
 						 * 	Unity's text element.
 						 */
-						text += "\n" + answerCount + ") " + new Regex("\\S").Replace(s, "*");
+						text += "\n" + answerCount + ") " + new Regex ("\\S").Replace (s, "*");
 					} else {
 						text += "\n" + answerCount + ") " + s;
 					}
